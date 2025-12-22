@@ -39,6 +39,7 @@ venv.bak/
 
 # Project Specific
 logs/
+MUJOCO_LOG.TXT
 *.zip
 *.png
 *.jpg
