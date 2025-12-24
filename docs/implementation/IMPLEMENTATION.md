@@ -328,10 +328,22 @@ Resettiamo la struttura per garantire ordine mentale e pulizia del codice.
 │   ├── __init__.py
 │   └── adr_callback.py      # IL CERVELLO (Membro 1)
 │
+├── /notebooks
+│   └── /verification        # Notebook di verifica
+│       ├── verify-member-1.ipynb  # Verifica implementazione Membro 1
+│       └── verify-member-2.ipynb  # Verifica implementazione Membro 2
+│
+├── /logs                    # Dove Tensorboard scriverà la storia
+│
 ├── train.py                 # SCRIPT PRINCIPALE (Membro 2)
 ├── test_random_policy.py    # SCRIPT DI DEBUG (Membro 1)
 ├── requirements.txt         # LE DIPENDENZE (Membro 2)
-└── logs/                    # Dove Tensorboard scriverà la storia
+│
+└── /docs
+    └── /implementation
+        ├── IMPLEMENTATION.md  # Guida generale per il team
+        ├── MEMBER-2.md        # Guida dettagliata per Membro 2
+        └── REPORT.md          # Report di ricerca
 ```
 
 ### 5.2 Installazione Dipendenze

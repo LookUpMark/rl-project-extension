@@ -17,16 +17,25 @@ This project extends the standard Hopper-v4 environment to implement ADR (Automa
 
 ```
 ├── env/
+│   ├── __init__.py
 │   ├── custom_hopper.py     # Extended Hopper with ADR support
-│   └── assets/hopper.xml    # MuJoCo model
+│   └── assets/
+│       └── hopper.xml       # MuJoCo model
 ├── callbacks/
+│   ├── __init__.py
 │   └── adr_callback.py      # ADR training callback
+├── notebooks/
+│   └── verification/
+│       ├── verify-member-1.ipynb  # Member 1 implementation verification
+│       └── verify-member-2.ipynb  # Member 2 implementation verification
+├── logs/                    # Tensorboard logs directory
 ├── train.py                 # Main training script
 ├── test_random_policy.py    # Environment testing script
 ├── requirements.txt
 └── docs/
     └── implementation/
-        ├── IMPLEMENTATION.md  # Full implementation guide
+        ├── IMPLEMENTATION.md  # Full implementation guide (team overview)
+        ├── MEMBER-2.md        # Detailed guide for Member 2
         └── REPORT.md          # Research report
 ```
 
@@ -68,7 +77,10 @@ tensorboard --logdir ./logs/
 ## Documentation
 
 - [Implementation Guide](docs/implementation/IMPLEMENTATION.md) - Complete step-by-step guide
+- [Member 2 Guide](docs/implementation/MEMBER-2.md) - Detailed guide for Integration & DevOps
 - [Research Report](docs/implementation/REPORT.md) - Theoretical background and analysis
+- [Member 1 Verification](notebooks/verification/verify-member-1.ipynb) - Verify Member 1 implementation
+- [Member 2 Verification](notebooks/verification/verify-member-2.ipynb) - Verify Member 2 implementation
 
 ## References
 
