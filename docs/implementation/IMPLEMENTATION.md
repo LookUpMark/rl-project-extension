@@ -1,24 +1,51 @@
 # GUIDA COMPLETA "ZERO-TO-HERO": SIM-TO-REAL HOPPER CON AUTOMATIC DOMAIN RANDOMIZATION (ADR)
 
-**Versione:** 4.0 (Final "Deep Research" Edition)  
+**Versione:** 5.0 (Team Edition - 2 Membri)  
 **Obiettivo:** Unica fonte di verità per l'implementazione, il training e la relazione finale del progetto.  
 **Stato:** Definitivo per l'esame.
 
 ---
 
+## STRUTTURA DEL TEAM
+
+Questo progetto è suddiviso tra **2 membri** con ruoli distinti ma complementari. I membri possono lavorare **in parallelo** grazie alla separazione delle responsabilità.
+
+| Ruolo | Responsabilità Principale | Sezioni di Competenza |
+|-------|---------------------------|----------------------|
+| **Membro 1** | Core RL & Ambiente | Fase 1 (CustomHopper), Fase 2 (ADR Callback), Debug |
+| **Membro 2** | Integrazione & DevOps | Setup, Fase 3 (Training Loop), Esecuzione, Analisi |
+
+> [!IMPORTANT]
+> **Prerequisito comune:** Entrambi i membri devono leggere la [Sezione 1 - Il Concetto ADR](#1-il-concetto-perché-adr) prima di iniziare.
+
+---
+
 ## INDICE
 
+**Prerequisiti (Entrambi i membri)**
 1.  [Il Concetto: Perché ADR?](#1-il-concetto-perché-adr)
-2.  [Setup dell'Ambiente di Lavoro](#2-setup-dellambiente-di-lavoro)
-3.  [Fase 1: Il Motore Fisico (CustomHopper)](#3-fase-1-il-motore-fisico-customhopper)
-4.  [Fase 2: Il Cervello (ADR Callback)](#4-fase-2-il-cervello-adr-callback)
-5.  [Fase 3: Il Training Loop (Main Script)](#5-fase-3-il-training-loop-main-script)
-6.  [Esecuzione e Monitoraggio](#6-esecuzione-e-monitoraggio)
-7.  [Analisi dei Risultati e Scrittura della Relazione](#7-analisi-dei-risultati-e-scrittura-della-relazione)
+
+**Membro 1 - Core RL & Ambiente**
+2.  [Fase 1: Il Motore Fisico (CustomHopper)](#2-fase-1-il-motore-fisico-customhopper)
+3.  [Fase 2: Il Cervello (ADR Callback)](#3-fase-2-il-cervello-adr-callback)
+4.  [File di Debug](#4-file-di-debug)
+
+**Membro 2 - Integrazione & DevOps**
+5.  [Setup dell'Ambiente di Lavoro](#5-setup-dellambiente-di-lavoro)
+6.  [Fase 3: Il Training Loop (Main Script)](#6-fase-3-il-training-loop-main-script)
+7.  [Esecuzione e Monitoraggio](#7-esecuzione-e-monitoraggio)
+8.  [Analisi dei Risultati e Scrittura della Relazione](#8-analisi-dei-risultati-e-scrittura-della-relazione)
+
+---
+
+# PREREQUISITI (ENTRAMBI I MEMBRI)
 
 ---
 
 ## 1. IL CONCETTO: PERCHÉ ADR?
+
+> [!NOTE]
+> Questa sezione è **obbligatoria per entrambi i membri**. Comprendere la teoria è essenziale per implementare correttamente sia l'ambiente (Membro 1) che il training loop (Membro 2).
 
 ### 1.1 Il problema: Il Paradosso del Sim-to-Real
 Addestrare robot in simulazione (Sim) per farli agire nel mondo reale (Real) è difficile a causa del **Reality Gap**.
@@ -37,67 +64,14 @@ L'ADR trasforma il training in un **curriculum automatico**. Immagina un cerchio
 
 ---
 
-## 2. SETUP DELL'AMBIENTE DI LAVORO
+# MEMBRO 1 - CORE RL & AMBIENTE
 
-Segui questi passaggi per preparare una "Clean Room" per il progetto.
-
-### 2.1 Struttura del File System
-Resettiamo la struttura per garantire ordine mentale e pulizia del codice.
-
-```text
-/project_rl_adr
-│
-├── /env
-│   ├── __init__.py          # (Vuoto o import base)
-│   ├── custom_hopper.py     # IL CUORE FISICO (Modificato Fase 1)
-│   └── assets/
-│       └── hopper.xml       # Il modello MuJoCo standard
-│
-├── /callbacks               # NUOVA CARTELLA
-│   ├── __init__.py
-│   └── adr_callback.py      # IL CERVELLO (Creato Fase 2)
-│
-├── train.py                 # SCRIPT PRINCIPALE (Modificato Fase 3)
-├── test_random_policy.py    # SCRIPT DI DEBUG (Opzionale)
-├── requirements.txt         # LE DIPENDENZE
-└── logs/                    # Dove Tensorboard scriverà la storia
-```
-
-### 2.2 Installazione Dipendenze
-Crea un file `requirements.txt` con questo contenuto esatto per evitare conflitti di versione:
-
-```text
-gymnasium
-mujoco
-stable-baselines3[extra]>=2.0.0
-tensorboard>=2.10.0
-matplotlib
-scipy
-numpy
-```
-
-Esegui nel terminale:
-```bash
-pip install -r requirements.txt
-```
-
-### 2.3 Il File del Modello `hopper.xml`
-
-Il file `env/assets/hopper.xml` è il modello fisico MuJoCo dell'Hopper. Questo file è **già incluso** nel repository. Se per qualche motivo dovesse mancare, puoi recuperarlo da:
-
-**Opzione A:** Copia dal tuo ambiente Gymnasium installato:
-```bash
-cp $(python -c "import gymnasium; print(gymnasium.__path__[0])")/envs/mujoco/assets/hopper.xml env/assets/
-```
-
-**Opzione B:** Scarica dal repository MuJoCo:
-```bash
-curl -o env/assets/hopper.xml https://raw.githubusercontent.com/google-deepmind/mujoco/main/model/hopper/hopper.xml
-```
+> [!IMPORTANT]
+> **Responsabilità:** Implementare il motore fisico ADR (`custom_hopper.py`) e la callback di controllo (`adr_callback.py`). Questi componenti sono **indipendenti** dal training loop e possono essere sviluppati in parallelo.
 
 ---
 
-## 3. FASE 1: IL MOTORE FISICO (`custom_hopper.py`)
+## 2. FASE 1: IL MOTORE FISICO (`custom_hopper.py`)
 
 **Ruolo:** Estendere l'ambiente base per supportare l'ADR. Il file `env/custom_hopper.py` contiene già l'implementazione completa dell'Hopper (step, reward, health check, registrazione gym). Dobbiamo aggiungere:
 1. Salvataggio dei valori nominali di **Damping** e **Friction**
@@ -109,7 +83,7 @@ curl -o env/assets/hopper.xml https://raw.githubusercontent.com/google-deepmind/
 
 ---
 
-### 3.1 Modifiche all'`__init__`
+### 2.1 Modifiche all'`__init__`
 
 Dopo l'inizializzazione esistente, aggiungere il salvataggio dei valori nominali e lo stato ADR:
 
@@ -133,7 +107,7 @@ self.min_friction_floor = 0.3 # Safe-guard: sotto 0.3 è impossibile camminare
 
 ---
 
-### 3.2 Estensione di `sample_parameters`
+### 2.2 Estensione di `sample_parameters`
 
 Modificare il metodo esistente per restituire un **dizionario** con massa, damping e friction:
 
@@ -171,7 +145,7 @@ def sample_parameters(self):
 
 ---
 
-### 3.3 Estensione di `set_parameters`
+### 2.3 Estensione di `set_parameters`
 
 Modificare per accettare il dizionario e applicare tutti i parametri:
 
@@ -190,7 +164,7 @@ def set_parameters(self, params):
 
 ---
 
-### 3.4 Nuovo metodo `update_adr`
+### 2.4 Nuovo metodo `update_adr`
 
 Aggiungere questo metodo che sarà chiamato dalla Callback:
 
@@ -232,7 +206,7 @@ def get_adr_info(self) -> Dict:
 
 ---
 
-### 3.5 Modifica di `reset_model`
+### 2.5 Modifica di `reset_model`
 
 Modificare per chiamare la pipeline ADR:
 
@@ -247,11 +221,9 @@ def reset_model(self):
     # ... resto del metodo ...
 ```
 
-```
-
 ---
 
-## 4. FASE 2: IL CERVELLO (`adr_callback.py`)
+## 3. FASE 2: IL CERVELLO (`adr_callback.py`)
 
 **Ruolo:** Monitorare costantemente l'agente e inviare i segnali di Espansione/Contrazione all'ambiente. Usa le API di `Stable Baselines3`.
 
@@ -309,7 +281,108 @@ class ADRCallback(BaseCallback):
 
 ---
 
-## 5. FASE 3: IL TRAINING LOOP (`train.py`)
+## 4. FILE DI DEBUG
+
+### 4.1 Script di Verifica: `test_random_policy.py`
+
+Il file `test_random_policy.py` serve per verificare che l'ambiente funzioni correttamente prima del training. Stampare le informazioni ADR per debug:
+
+```python
+# Dopo env.reset()
+if hasattr(env.unwrapped, 'adr_state'):
+    print('ADR State:', env.unwrapped.adr_state)
+```
+
+> [!TIP]
+> **Checkpoint per Membro 1:** Prima di passare il codice a Membro 2, verificare:
+> - [ ] `custom_hopper.py` si importa senza errori
+> - [ ] `ADRCallback` si importa senza errori
+> - [ ] `test_random_policy.py` mostra lo stato ADR correttamente
+
+---
+
+# MEMBRO 2 - INTEGRAZIONE & DEVOPS
+
+> [!IMPORTANT]
+> **Responsabilità:** Configurare l'ambiente di sviluppo, integrare i componenti sviluppati da Membro 1, eseguire il training e analizzare i risultati. Può iniziare il setup **in parallelo** mentre Membro 1 sviluppa.
+
+---
+
+## 5. SETUP DELL'AMBIENTE DI LAVORO
+
+Segui questi passaggi per preparare una "Clean Room" per il progetto.
+
+### 5.1 Struttura del File System
+Resettiamo la struttura per garantire ordine mentale e pulizia del codice.
+
+```text
+/project_rl_adr
+│
+├── /env
+│   ├── __init__.py          # (Vuoto o import base)
+│   ├── custom_hopper.py     # IL CUORE FISICO (Membro 1)
+│   └── assets/
+│       └── hopper.xml       # Il modello MuJoCo standard
+│
+├── /callbacks               # NUOVA CARTELLA
+│   ├── __init__.py
+│   └── adr_callback.py      # IL CERVELLO (Membro 1)
+│
+├── train.py                 # SCRIPT PRINCIPALE (Membro 2)
+├── test_random_policy.py    # SCRIPT DI DEBUG (Membro 1)
+├── requirements.txt         # LE DIPENDENZE (Membro 2)
+└── logs/                    # Dove Tensorboard scriverà la storia
+```
+
+### 5.2 Installazione Dipendenze
+Crea un file `requirements.txt` con questo contenuto esatto per evitare conflitti di versione:
+
+```text
+gymnasium
+mujoco
+stable-baselines3[extra]>=2.0.0
+tensorboard>=2.10.0
+matplotlib
+scipy
+numpy
+```
+
+Esegui nel terminale:
+```bash
+pip install -r requirements.txt
+```
+
+### 5.3 Il File del Modello `hopper.xml`
+
+Il file `env/assets/hopper.xml` è il modello fisico MuJoCo dell'Hopper. Questo file è **già incluso** nel repository. Se per qualche motivo dovesse mancare, puoi recuperarlo da:
+
+**Opzione A:** Copia dal tuo ambiente Gymnasium installato:
+```bash
+cp $(python -c "import gymnasium; print(gymnasium.__path__[0])")/envs/mujoco/assets/hopper.xml env/assets/
+```
+
+**Opzione B:** Scarica dal repository MuJoCo:
+```bash
+curl -o env/assets/hopper.xml https://raw.githubusercontent.com/google-deepmind/mujoco/main/model/hopper/hopper.xml
+```
+
+### 5.4 Preparazione Cartelle
+
+Crea la struttura di cartelle necessaria:
+```bash
+mkdir -p env/assets callbacks logs
+touch env/__init__.py callbacks/__init__.py
+```
+
+> [!TIP]
+> **Checkpoint per Membro 2 (Setup):** Prima di procedere, verificare:
+> - [ ] `pip install -r requirements.txt` completato senza errori
+> - [ ] Cartelle `env/`, `callbacks/`, `logs/` create
+> - [ ] File `hopper.xml` presente in `env/assets/`
+
+---
+
+## 6. FASE 3: IL TRAINING LOOP (`train.py`)
 
 **Ruolo:** Orchestrare il training con ADR. Il file `train.py` contiene già la logica base del training (setup environment, PPO, evaluate). Dobbiamo aggiungere:
 1. Wrapper `Monitor` per permettere alla callback di leggere le statistiche
@@ -318,9 +391,12 @@ class ADRCallback(BaseCallback):
 
 **Il file base è già presente in `train.py`.** Qui sotto sono documentate le **modifiche chiave**.
 
+> [!WARNING]
+> **Dipendenza:** Questa sezione richiede che Membro 1 abbia completato `adr_callback.py`. Puoi comunque preparare il codice e commentare temporaneamente l'import della callback.
+
 ---
 
-### 5.1 Import aggiuntivi
+### 6.1 Import aggiuntivi
 
 Aggiungere in cima al file:
 
@@ -331,7 +407,7 @@ from callbacks.adr_callback import ADRCallback
 
 ---
 
-### 5.2 Wrapper Monitor sull'ambiente
+### 6.2 Wrapper Monitor sull'ambiente
 
 Modificare la creazione dell'ambiente di training:
 
@@ -347,7 +423,7 @@ Il `Monitor` wrapper è **essenziale** perché la callback ADR usa `model.ep_inf
 
 ---
 
-### 5.3 Istanza della Callback
+### 6.3 Istanza della Callback
 
 Prima di `model.learn()`, creare la callback:
 
@@ -358,7 +434,7 @@ adr_callback = ADRCallback(check_freq=2048)
 
 ---
 
-### 5.4 Training con Callback e Tensorboard
+### 6.4 Training con Callback e Tensorboard
 
 Modificare la chiamata a `learn()`:
 
@@ -379,20 +455,7 @@ Note:
 
 ---
 
-### 5.5 File di Debug: `test_random_policy.py`
-
-Il file `test_random_policy.py` serve per verificare che l'ambiente funzioni correttamente prima del training. Stampare le informazioni ADR per debug:
-
-```python
-# Dopo env.reset()
-if hasattr(env.unwrapped, 'adr_state'):
-    print('ADR State:', env.unwrapped.adr_state)
-```
-
-
----
-
-## 6. ESECUZIONE E MONITORAGGIO
+## 7. ESECUZIONE E MONITORAGGIO
 
 1.  **Lancia il Training:**
     ```bash
@@ -413,20 +476,20 @@ if hasattr(env.unwrapped, 'adr_state'):
 
 ---
 
-## 7. ANALISI DEI RISULTATI E SCRITTURA DELLA RELAZIONE
+## 8. ANALISI DEI RISULTATI E SCRITTURA DELLA RELAZIONE
 
 Per completare il progetto (Punto 4), usa questi dati nella tua relazione. Cita le fonti teoriche per dare spessore accademico.
 
-### 7.1 Interpreta i Grafici
+### 8.1 Interpreta i Grafici
 *   **Curva di Reward vs ADR Range:** Mostra come il reward rimane stabile (o recupera velocemente) anche mentre il `mass_range` aumenta. Questo dimostra **adattamento**.
 *   **Il Delta Finale:** Se il `mass_range` finale è, per esempio, `0.40` (40%), significa che la tua policy può gestire un robot che pesa il 40% in più o in meno del previsto. Questo è un risultato quantitativo di robustezza enorme.
 
-### 7.2 Confronto Sim-to-Real
+### 8.2 Confronto Sim-to-Real
 Confronta il grafico `adr_robustness_chart.png` con i risultati che avevi ottenuto prima (senza ADR).
 *   **Senza ADR:** Il gap tra Source e Target era probabilmente ampio.
 *   **Con ADR:** Il gap dovrebbe essersi ridotto drasticamente (o addirittura il Target potrebbe andare meglio del Source se l'ADR ha generato ambienti più difficili del Target stesso).
 
-### 7.3 Bibliografia Essenziale per la Relazione
+### 8.3 Bibliografia Essenziale per la Relazione
 Copia/Incolla e rielabora questi riferimenti nel tuo report finale per giustificare le scelte tecniche:
 
 > *   **Su ADR:** OpenAI et al., *"Solving Rubik's Cube with a Robot Hand"*, 2019. (Fondamentale per spiegare l'algoritmo).
@@ -435,4 +498,47 @@ Copia/Incolla e rielabora questi riferimenti nel tuo report finale per giustific
 > *   **Sui pericoli dell'UDR:** Mehta et al., *"Active Domain Randomization"*, 2020. (Per spiegare perché i range fissi sono pericolosi).
 
 ---
-**Congratulazioni.** Hai trasformato un semplice esercizio di RL in un sistema di training adativo state-of-the-art. Sei pronto per la consegna.
+
+# RIEPILOGO DIVISIONE DEL LAVORO
+
+## Timeline Consigliata (Lavoro Parallelo)
+
+```mermaid
+gantt
+    title Timeline Progetto ADR - 2 Membri
+    dateFormat  X
+    axisFormat %s
+    
+    section Membro 1
+    Fase 1 - CustomHopper    :m1a, 0, 3
+    Fase 2 - ADR Callback    :m1b, 3, 5
+    Debug & Test             :m1c, 5, 6
+    
+    section Membro 2
+    Setup Ambiente           :m2a, 0, 2
+    Fase 3 - Training Loop   :m2b, 2, 5
+    Esecuzione & Analisi     :m2c, 5, 8
+    
+    section Integrazione
+    Merge & Test Finale      :crit, merge, 6, 8
+```
+
+## Checklist Finale per Membro
+
+### Membro 1 - Core RL & Ambiente
+- [ ] Modifiche a `env/custom_hopper.py` completate
+- [ ] File `callbacks/adr_callback.py` creato
+- [ ] Test con `test_random_policy.py` superato
+- [ ] Codice pushato/condiviso con Membro 2
+
+### Membro 2 - Integrazione & DevOps
+- [ ] Ambiente configurato (`requirements.txt` installato)
+- [ ] Struttura cartelle creata
+- [ ] `train.py` modificato con Monitor e Callback
+- [ ] Training eseguito con successo
+- [ ] Screenshot Tensorboard salvati per relazione
+- [ ] Analisi risultati completata
+
+---
+
+**Congratulazioni.** Avete trasformato un semplice esercizio di RL in un sistema di training adativo state-of-the-art. Siete pronti per la consegna.
