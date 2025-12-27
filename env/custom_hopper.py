@@ -242,6 +242,9 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
         # --- ADR EXTENSION: Apply ADR randomization ---
         # TODO: Chiamare sample_parameters() e set_parameters() con logica ADR
         # Nota: Questo sostituirà la logica UDR quando ADR è attivo
+        if any([v > 0.0 for v in self.adr_state.values()]):
+            params = self.sample_parameters()
+            self.set_parameters(params)
 
         observation = self._get_obs()
         return observation
@@ -258,29 +261,35 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
 
     def sample_parameters(self):
         """
-        Sample masses according to a domain randomization distribution.
-        
-        VERSIONE BASE (UDR): Randomizza solo le masse con fattore 0.8-1.2.
-        
-        TODO (ADR Extension): Estendere per usare self.adr_state e randomizzare
-        anche damping e friction. Il return dovrebbe diventare un dict:
-        {
-            "masses": [...],
-            "damping": [...],
-            "friction": [...]
-        }
-        
-        Returns:
-            list: Masse randomizzate (versione base)
-            dict: Parametri fisici completi (versione ADR - da implementare)
+        Sample masses, damping, and friction according to ADR state.
+        Returns a dict with keys: masses, damping, friction.
         """
-        # --- VERSIONE BASE (UDR) ---
-        torso_mass = self.original_masses[0] - 1.0
+        # Masses
+        mass_range = self.adr_state["mass_range"]
         masses = []
-        for mass in self.original_masses[1:]:
-            masses.append(mass * np.random.uniform(0.8, 1.2))
-        masses.insert(0, torso_mass)
-        return masses
+        for i, mass in enumerate(self.original_masses):
+            low = mass * (1.0 - mass_range)
+            high = mass * (1.0 + mass_range)
+            masses.append(np.random.uniform(low, high))
+        # Damping
+        damping_range = self.adr_state["damping_range"]
+        damping = []
+        for i, damp in enumerate(self.original_damping):
+            low = damp * (1.0 - damping_range)
+            high = damp * (1.0 + damping_range)
+            damping.append(np.random.uniform(low, high))
+        # Friction
+        friction_range = self.adr_state["friction_range"]
+        friction = []
+        for i, fric in enumerate(self.original_friction):
+            low = max(fric * (1.0 - friction_range), self.min_friction_floor)
+            high = fric * (1.0 + friction_range)
+            friction.append(np.random.uniform(low, high))
+        return {
+            "masses": masses,
+            "damping": damping,
+            "friction": friction
+        }
 
     def get_parameters(self):
         """Get value of mass for each link"""
@@ -289,21 +298,15 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
 
     def set_parameters(self, task):
         """
-        Set each hopper link's mass to a new value.
-        
-        VERSIONE BASE (UDR): Accetta una lista di masse.
-        
-        TODO (ADR Extension): Estendere per accettare un dict con chiavi
-        "masses", "damping", "friction" e applicare tutti i parametri:
-            self.model.body_mass[1:] = params["masses"]
-            self.model.dof_damping[:] = params["damping"]
-            self.model.geom_friction[:] = params["friction"]
-        
-        Args:
-            task: Lista di masse (versione base) o dict di parametri (versione ADR)
+        Set each hopper link's mass, damping, and friction to new values.
+        Accepts a dict with keys: masses, damping, friction (ADR) or a list (legacy UDR).
         """
-        # --- VERSIONE BASE (UDR) ---
-        self.model.body_mass[1:] = task
+        if isinstance(task, dict):
+            self.model.body_mass[1:] = task["masses"]
+            self.model.dof_damping[:] = task["damping"]
+            self.model.geom_friction[:] = task["friction"]
+        else:
+            self.model.body_mass[1:] = task
 
     # ========================================================================
     # ADR EXTENSION METHODS (DA IMPLEMENTARE)
@@ -329,8 +332,16 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
                 - status_string: "expanded", "contracted", o "stable"
                 - adr_state_dict: Copy of self.adr_state dopo l'update
         """
-        # TODO: Implementare la logica di espansione/contrazione
-        pass
+        status = "stable"
+        if mean_reward >= high_th:
+            for k in self.adr_state:
+                self.adr_state[k] = min(self.adr_state[k] + self.adr_step_size, 1.0)
+            status = "expanded"
+        elif mean_reward < low_th:
+            for k in self.adr_state:
+                self.adr_state[k] = max(self.adr_state[k] - self.adr_step_size, 0.0)
+            status = "contracted"
+        return status, self.adr_state.copy()
 
     def get_adr_info(self) -> Dict:
         """
