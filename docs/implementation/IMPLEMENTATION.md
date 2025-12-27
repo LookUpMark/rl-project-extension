@@ -321,31 +321,31 @@ Resettiamo la struttura per garantire ordine mentale e pulizia del codice.
 /project_rl_adr
 │
 ├── /env
-│   ├── __init__.py          # (Vuoto o import base)
-│   ├── custom_hopper.py     # IL CUORE FISICO (Membro 1)
-│   └── assets/
-│       └── hopper.xml       # Il modello MuJoCo standard
-│
-├── /callbacks               # NUOVA CARTELLA
 │   ├── __init__.py
-│   └── adr_callback.py      # IL CERVELLO (Membro 1)
+│   ├── custom_hopper.py     # Ambiente con ADR
+│   └── assets/hopper.xml
 │
-├── /notebooks
-│   └── /verification        # Notebook di verifica
-│       ├── verify-member-1.ipynb  # Verifica implementazione Membro 1
-│       └── verify-member-2.ipynb  # Verifica implementazione Membro 2
+├── /callbacks
+│   └── adr_callback.py      # Callback ADR
 │
-├── /logs                    # Dove Tensorboard scriverà la storia
+├── /scripts
+│   ├── /train               # Script di training
+│   │   ├── train_adr.py
+│   │   ├── train_baseline.py
+│   │   └── train_udr.py
+│   └── /test                # Script di test
+│       ├── test_comparison.py
+│       └── test_random_policy.py
 │
-├── train.py                 # SCRIPT PRINCIPALE (Membro 2)
-├── test_random_policy.py    # SCRIPT DI DEBUG (Membro 1)
-├── requirements.txt         # LE DIPENDENZE (Membro 2)
+├── /logs                    # Tensorboard logs
 │
-└── /docs
-    └── /implementation
-        ├── IMPLEMENTATION.md  # Guida generale per il team
-        ├── MEMBER-2.md        # Guida dettagliata per Membro 2
-        └── REPORT.md          # Report di ricerca
+├── /docs
+│   ├── /assignment
+│   ├── /implementation
+│   └── /evaluation
+│       └── /figures         # Grafici generati
+│
+└── requirements.txt
 ```
 
 ### 5.2 Installazione Dipendenze
@@ -471,9 +471,15 @@ Note:
 
 ## 7. ESECUZIONE E MONITORAGGIO
 
-1.  **Lancia il Training:**
+1.  **Lancia il Training ADR:**
     ```bash
-    python train.py
+    python scripts/train/train_adr.py
+    ```
+    
+    **Altri training per confronto:**
+    ```bash
+    python scripts/train/train_baseline.py  # No Domain Randomization
+    python scripts/train/train_udr.py       # Uniform Domain Randomization
     ```
     
 2.  **Monitora l'Evoluzione (Live):**

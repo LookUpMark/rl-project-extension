@@ -31,10 +31,10 @@ def main():
         5. Generate comparison plots
     """
     # --- CONFIGURATION ---
-    log_dir = "./logs/"
+    log_dir = "./logs/adr/"
     os.makedirs(log_dir, exist_ok=True)
     
-    total_timesteps = 5_000_000  # 5M for maximum ADR expansion and robustness
+    total_timesteps = 2_500_000  # 2.5M for comparison experiment
     
     # --- ENVIRONMENT SETUP ---
     # Source: Training environment wrapped with Monitor for callback access
@@ -63,7 +63,7 @@ def main():
     print("--- TRAINING COMPLETE ---")
 
     # --- SAVE MODEL ---
-    model_path = os.path.join(log_dir, "ppo_hopper_adr_final")
+    model_path = os.path.join(log_dir, "ppo_hopper_adr")
     model.save(model_path)
     print(f"Model saved to {model_path}")
 

@@ -245,15 +245,22 @@ Una volta completate tutte le modifiche, sei pronto per lanciare il training. Qu
 
 ### 4.1 Lancio del Training
 
-Apri un terminale nella directory principale del progetto e lancia lo script di training:
+Apri un terminale nella directory principale del progetto e lancia lo script di training ADR:
 
 ```bash
-python train.py
+python train_adr.py
+```
+
+Per un confronto completo, puoi anche eseguire gli altri due training:
+
+```bash
+python train_baseline.py  # Training senza domain randomization (baseline)
+python train_udr.py       # Training con Uniform Domain Randomization
 ```
 
 Vedrai apparire una progress bar che mostra l'avanzamento del training. Se il `verbose` è impostato a 1, vedrai anche messaggi periodici dalla callback ADR che indicano quando i bounds vengono espansi o contratti.
 
-Il training con 300000 timestep richiede tipicamente tra 15 e 45 minuti, a seconda dell'hardware disponibile. Durante questo tempo, puoi aprire un secondo terminale per monitorare i grafici con Tensorboard.
+Il training con 2.5M timestep richiede circa 1 ora e 15 minuti. Durante questo tempo, puoi aprire un secondo terminale per monitorare i grafici con Tensorboard.
 
 ### 4.2 Monitoraggio con Tensorboard
 
