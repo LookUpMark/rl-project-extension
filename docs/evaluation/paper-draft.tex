@@ -85,7 +85,14 @@ Our primary experiment trained for 5 million timesteps with ADR enabled. The tra
 
 The training then entered a prolonged consolidation phase lasting roughly 3 million steps. During this period, no expansions or contractions occurred as the agent hovered near the expansion threshold without consistently exceeding it. This plateau suggests that 55\% randomization represented a significant challenge requiring extended learning to master.
 
-Finally, in the last 1.5 million steps, three additional expansions pushed ranges to the final value of 70\%. The complete absence of contractions throughout training---fourteen expansions with zero contractions---indicates robust learning without catastrophic forgetting or instability.
+Finally, in the last 1.5 million steps, three additional expansions pushed ranges to the final value of 70\%. The complete absence of contractions throughout training---fourteen expansions with zero contractions---indicates robust learning without catastrophic forgetting or instability. Figure~\ref{fig:training} illustrates these dynamics.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/training_curves.png}
+\caption{Left: ADR range expansion over training, showing the step-wise increase from 0\% to 70\%. Right: Mean episode reward during training, with dashed lines indicating expansion (1200) and contraction (600) thresholds.}
+\label{fig:training}
+\end{figure}
 
 \subsection{Final Performance}
 
@@ -132,7 +139,14 @@ ADR & \PLACEHOLDER{XXX} & \PLACEHOLDER{XXX} & \PLACEHOLDER{+ZZ\%} \\
 \end{center}
 \end{table}
 
-The baseline is expected to show the traditional reality gap pattern: strong source performance but degraded transfer to target. UDR should partially close this gap through its fixed randomization. ADR should achieve the best transfer, with the adaptive curriculum enabling higher final robustness.
+The baseline is expected to show the traditional reality gap pattern: strong source performance but degraded transfer to target. UDR should partially close this gap through its fixed randomization. ADR should achieve the best transfer, with the adaptive curriculum enabling higher final robustness. Figure~\ref{fig:comparison} provides a visual comparison of the final performance across all methods.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/final_performance.png}
+\caption{Final performance comparison across training methods. Green bars show source (training) environment performance, red bars show target (transfer) environment performance. Error bars indicate standard deviation over 30 evaluation episodes.}
+\label{fig:comparison}
+\end{figure}
 
 \section{Discussion}
 
