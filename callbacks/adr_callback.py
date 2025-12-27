@@ -24,10 +24,11 @@ class ADRCallback(BaseCallback):
         self.check_freq = check_freq
         
         # SOGLIE DI PERFORMANCE
-        # Hopper-v4 "risolto" è ~3000.
-        # TODO: Calibrare queste soglie in base ai risultati del training base
-        self.threshold_high = 2000  # Se reward > 2000, aumenta difficoltà
-        self.threshold_low = 1000   # Se reward < 1000, diminuisci difficoltà
+        # Basate sui risultati reali del training (~1300 max reward)
+        # Threshold High (1200): Se superato, l'ambiente è "troppo facile" -> Espandi
+        # Threshold Low (600): Se non raggiunto, l'ambiente è "troppo difficile" -> Contrai
+        self.threshold_high = 1200
+        self.threshold_low = 600
 
     def _on_step(self) -> bool:
         """

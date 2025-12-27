@@ -115,32 +115,35 @@ Modificare il metodo esistente per restituire un **dizionario** con massa, dampi
 def sample_parameters(self):
     """
     Genera un nuovo set di parametri fisici basati sulla difficoltà (adr_state) attuale.
-    Estende la logica base randomizzando non solo massa ma anche attrito e damping.
     
     Returns:
         dict: Dizionario con chiavi "masses", "damping", "friction"
     """
-    params = {}
-    
     # A. MASSA
-    m_delta = self.adr_state["mass_range"]
-    m_scale = self.np_random.uniform(1.0 - m_delta, 1.0 + m_delta, size=self.original_masses.shape)
-    # Nota: original_masses è [1:], quindi dobbiamo gestire l'offset
-    params["masses"] = self.original_masses * m_scale
-
-    # B. DAMPING
-    d_delta = self.adr_state["damping_range"]
-    d_scale = self.np_random.uniform(max(0.1, 1.0 - d_delta), 1.0 + d_delta, size=self.original_damping.shape)
-    params["damping"] = self.original_damping * d_scale
-
-    # C. FRICTION
-    f_delta = self.adr_state["friction_range"]
-    f_scale = self.np_random.uniform(max(self.min_friction_floor, 1.0 - f_delta), 1.0 + f_delta, size=(self.original_friction.shape[0], 1))
-    new_friction = self.original_friction.copy()
-    new_friction[:, 0] = self.original_friction[:, 0] * f_scale.flatten()
-    params["friction"] = new_friction
+    mass_range = self.adr_state["mass_range"]
+    masses = []
+    for i, mass in enumerate(self.original_masses):
+        low = mass * (1.0 - mass_range)
+        high = mass * (1.0 + mass_range)
+        masses.append(np.random.uniform(low, high))
     
-    return params
+    # B. DAMPING
+    damping_range = self.adr_state["damping_range"]
+    damping = []
+    for i, damp in enumerate(self.original_damping):
+        low = damp * (1.0 - damping_range)
+        high = damp * (1.0 + damping_range)
+        damping.append(np.random.uniform(low, high))
+    
+    # C. FRICTION - NOTA: usare np.maximum per confronto element-wise
+    friction_range = self.adr_state["friction_range"]
+    friction = []
+    for i, fric in enumerate(self.original_friction):
+        low = np.maximum(fric * (1.0 - friction_range), self.min_friction_floor)
+        high = fric * (1.0 + friction_range)
+        friction.append(np.random.uniform(low, high))
+    
+    return {"masses": masses, "damping": damping, "friction": friction}
 ```
 
 ---
@@ -241,12 +244,11 @@ class ADRCallback(BaseCallback):
         super().__init__(verbose)
         self.check_freq = check_freq
         
-        # SOGLIE DI PERFORMANCE (Performance Thresholds)
-        # Hopper-v4 "risolto" è ~3000.
-        # Threshold High (2000): Se superato, l'ambiente è "troppo facile" -> Espandi.
-        # Threshold Low (1000): Se non raggiunto, l'ambiente è "troppo difficile" -> Contrai.
-        self.threshold_high = 2000 
-        self.threshold_low = 1000   
+        # SOGLIE DI PERFORMANCE (calibrate sui risultati reali)
+        # Threshold High (1200): Se superato, l'ambiente è "troppo facile" -> Espandi
+        # Threshold Low (600): Se non raggiunto, l'ambiente è "troppo difficile" -> Contrai
+        self.threshold_high = 1200
+        self.threshold_low = 600   
 
     def _on_step(self) -> bool:
         if self.n_calls % self.check_freq == 0:

@@ -208,10 +208,10 @@ model.learn(total_timesteps=200000, progress_bar=True)
 Devi modificarla così:
 
 ```python
-model.learn(total_timesteps=300000, callback=adr_callback, progress_bar=True)
+model.learn(total_timesteps=5000000, callback=adr_callback, progress_bar=True)
 ```
 
-Il numero di timestep è stato aumentato a 300000 per dare all'ADR tempo sufficiente di espandere i range di randomizzazione. Il parametro `callback=adr_callback` aggancia la callback che abbiamo creato, facendo sì che venga chiamata ad ogni step del training.
+Il numero di timestep è stato aumentato a 5.000.000 per dare all'ADR tempo sufficiente di espandere i range di randomizzazione fino a valori elevati (±70%). Il parametro `callback=adr_callback` aggancia la callback che abbiamo creato, facendo sì che venga chiamata ad ogni step del training.
 
 ### 3.6 Esempio Completo delle Modifiche
 
@@ -269,9 +269,9 @@ Nella tab SCALARS troverai diversi grafici cruciali. Il grafico `adr/mean_reward
 
 ### 4.3 Interpretazione dei Grafici Durante il Training
 
-Il comportamento atteso è una curva "a gradini" per i grafici dei range ADR. Inizialmente i valori saranno tutti a zero. Man mano che l'agente impara e supera la soglia alta di performance (2000 di reward), vedrai i valori salire di 0.05 alla volta. Questo indica che l'ambiente sta diventando progressivamente più difficile.
+Il comportamento atteso è una curva "a gradini" per i grafici dei range ADR. Inizialmente i valori saranno tutti a zero. Man mano che l'agente impara e supera la soglia alta di performance (1200 di reward), vedrai i valori salire di 0.05 alla volta. Questo indica che l'ambiente sta diventando progressivamente più difficile.
 
-Se l'agente fatica troppo e scende sotto la soglia bassa (1000 di reward), i valori scenderanno, indicando che l'ambiente si sta semplificando per permettere all'agente di recuperare.
+Se l'agente fatica troppo e scende sotto la soglia bassa (600 di reward), i valori scenderanno, indicando che l'ambiente si sta semplificando per permettere all'agente di recuperare.
 
 Un segnale molto positivo è vedere i range ADR che salgono costantemente con solo occasionali piccole discese. Questo indica che l'agente sta imparando in modo robusto e sta espandendo continuamente la sua zona di competenza.
 

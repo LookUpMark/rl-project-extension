@@ -34,7 +34,7 @@ def main():
     log_dir = "./logs/"
     os.makedirs(log_dir, exist_ok=True)
     
-    total_timesteps = 300000  # Increase for ADR to have time to expand
+    total_timesteps = 5_000_000  # 5M for maximum ADR expansion and robustness
     
     # --- ENVIRONMENT SETUP ---
     # Source: Training environment wrapped with Monitor for callback access

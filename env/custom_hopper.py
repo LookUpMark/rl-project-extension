@@ -282,7 +282,7 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
         friction_range = self.adr_state["friction_range"]
         friction = []
         for i, fric in enumerate(self.original_friction):
-            low = max(fric * (1.0 - friction_range), self.min_friction_floor)
+            low = np.maximum(fric * (1.0 - friction_range), self.min_friction_floor)
             high = fric * (1.0 + friction_range)
             friction.append(np.random.uniform(low, high))
         return {
