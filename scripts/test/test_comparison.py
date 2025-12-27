@@ -39,13 +39,15 @@ def plot_training_curves():
     """Plot ADR evolution and reward curves in a compact 2-panel figure."""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
     
-    # Find ADR logs
-    ppo_dirs = sorted(glob(f'{LOGS_DIR}PPO_*/'))
-    colors = ['#d62728', '#2ca02c', '#1f77b4', '#ff7f0e']
+    # ADR logs with explicit paths
+    adr_runs = [
+        ('ADR 5M', f'{LOGS_DIR}adr/run_5M/', '#d62728'),
+        ('ADR 2.5M', f'{LOGS_DIR}adr/run_2_5M/', '#2ca02c')
+    ]
     
-    for i, log_dir in enumerate(ppo_dirs[:2]):
-        name = f"ADR {'5M' if i == 0 else '2.5M'}"
-        color = colors[i]
+    for name, log_dir, color in adr_runs:
+        if not os.path.exists(log_dir):
+            continue
         
         # ADR Range
         steps, values = get_tb_data(log_dir, 'adr/mass_range_delta')
@@ -79,13 +81,48 @@ def plot_training_curves():
     plt.close()
 
 
+def plot_learning_curves():
+    """Plot reward curves for ALL methods (Baseline, UDR, ADR)."""
+    fig, ax = plt.subplots(figsize=(12, 5))
+    
+    # All training runs with their log directories
+    all_runs = [
+        ('Baseline', f'{LOGS_DIR}baseline/', '#1f77b4'),
+        ('UDR', f'{LOGS_DIR}udr/', '#ff7f0e'),
+        ('ADR 2.5M', f'{LOGS_DIR}adr/run_2_5M/', '#2ca02c'),
+        ('ADR 5M', f'{LOGS_DIR}adr/run_5M/', '#d62728')
+    ]
+    
+    for name, log_dir, color in all_runs:
+        if not os.path.exists(log_dir):
+            continue
+        
+        steps, values = get_tb_data(log_dir, 'rollout/ep_rew_mean')
+        if steps is not None and len(steps) > 0:
+            # Smooth the curve
+            w = min(50, len(values)//10) or 1
+            smoothed = np.convolve(values, np.ones(w)/w, mode='valid')
+            ax.plot(steps[:len(smoothed)]/1e6, smoothed, label=name, color=color, linewidth=2)
+    
+    ax.set_xlabel('Timesteps (M)', fontsize=11)
+    ax.set_ylabel('Episode Reward (smoothed)', fontsize=11)
+    ax.set_title('Learning Curves: All Methods Comparison', fontsize=12, fontweight='bold')
+    ax.legend(loc='lower right')
+    ax.grid(alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(f'{OUTPUT_DIR}learning_curves.png', dpi=150, bbox_inches='tight')
+    print(f"Saved: {OUTPUT_DIR}learning_curves.png")
+    plt.close()
+
+
 def plot_final_performance():
     """Evaluate models and create bar chart."""
     models = {
         'Baseline': f'{LOGS_DIR}baseline/ppo_hopper_baseline.zip',
         'UDR': f'{LOGS_DIR}udr/ppo_hopper_udr.zip', 
-        'ADR 2.5M': f'{LOGS_DIR}adr/ppo_hopper_adr.zip',
-        'ADR 5M': f'{LOGS_DIR}ppo_hopper_adr_final.zip'  # Legacy location
+        'ADR 2.5M': f'{LOGS_DIR}adr/ppo_hopper_adr_2_5M.zip',
+        'ADR 5M': f'{LOGS_DIR}adr/ppo_hopper_adr_5M.zip'
     }
     
     results = {}
@@ -156,5 +193,6 @@ if __name__ == '__main__':
     
     print("=== GENERATING COMPARISON CHARTS ===\n")
     plot_training_curves()
+    plot_learning_curves()
     plot_final_performance()
     print("\n✅ Done!")

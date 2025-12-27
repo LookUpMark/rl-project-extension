@@ -9,6 +9,10 @@ This script implements the full training pipeline:
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import os
+import sys
+
+# Add project root to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
@@ -31,10 +35,11 @@ def main():
         5. Generate comparison plots
     """
     # --- CONFIGURATION ---
-    log_dir = "./logs/adr/"
+    run_name = "5M"  # Change to "2_5M" for 2.5M run
+    log_dir = f"./logs/adr/run_{run_name}/"
     os.makedirs(log_dir, exist_ok=True)
     
-    total_timesteps = 2_500_000  # 2.5M for comparison experiment
+    total_timesteps = 5_000_000  # 5M for maximum ADR expansion
     
     # --- ENVIRONMENT SETUP ---
     # Source: Training environment wrapped with Monitor for callback access
@@ -63,7 +68,7 @@ def main():
     print("--- TRAINING COMPLETE ---")
 
     # --- SAVE MODEL ---
-    model_path = os.path.join(log_dir, "ppo_hopper_adr")
+    model_path = f"./logs/adr/ppo_hopper_adr_{run_name}"
     model.save(model_path)
     print(f"Model saved to {model_path}")
 

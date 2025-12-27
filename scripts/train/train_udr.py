@@ -6,6 +6,10 @@ Used to compare with ADR (adaptive) approach.
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import os
+import sys
+
+# Add project root to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.monitor import Monitor
