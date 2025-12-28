@@ -7,9 +7,6 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 
-\newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
-\newcommand{\PLACEHOLDER}[1]{\textcolor{orange}{\textbf{[#1]}}}
-
 \begin{document}
 
 \title{Automatic Domain Randomization for Robust Sim-to-Real Transfer in Locomotion Tasks}
@@ -24,13 +21,13 @@ s336362@studenti.polito.it}
 \IEEEauthorblockA{\textit{Department of Control and Computer Engineering} \\
 \textit{Polytechnic University of Turin}\\
 Turin, Italy \\
-\PLACEHOLDER{email}}
+s332575@studenti.polito.it}
 }
 
 \maketitle
 
 \begin{abstract}
-Transferring reinforcement learning policies from simulation to the real world remains a fundamental challenge due to the mismatch between simulated and physical dynamics, commonly known as the reality gap. In this work, we implement and evaluate Automatic Domain Randomization for the MuJoCo Hopper locomotion task. Unlike traditional approaches that use fixed randomization ranges, our method adaptively expands environmental difficulty based on agent performance, creating a natural curriculum that prevents both underfitting and learned helplessness. Our experiments demonstrate that this approach achieves robustness to variations of up to 70\% in physical parameters including mass, damping, and friction. Most notably, the trained policy exhibits an inverse transfer gap, where performance on the target domain actually exceeds that on the source domain by 65\%, indicating exceptional generalization capabilities.
+Transferring reinforcement learning policies from simulation to the real world remains a fundamental challenge due to the mismatch between simulated and physical dynamics, commonly known as the reality gap. In this work, we implement and evaluate Automatic Domain Randomization (ADR) for the MuJoCo Hopper locomotion task. Unlike traditional approaches that use fixed randomization ranges, our method adaptively expands environmental difficulty based on agent performance, creating a natural curriculum that prevents both underfitting and learned helplessness. Through systematic experiments comparing five training configurations---Baseline, Uniform Domain Randomization (UDR), and ADR at 2.5M, 5M, and 10M timesteps---we find that UDR achieves the best transfer performance with a $+3.9\%$ positive transfer gap, while ADR 10M achieves near-perfect transfer stability ($-0.4\%$ gap) with significantly lower variance. Notably, ADR models reach robustness levels of $\pm60\%$ parameter variation. Our results demonstrate the importance of balancing robustness with task performance for effective sim-to-real transfer.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,15 +44,15 @@ Traditional Uniform Domain Randomization (UDR) samples parameters from fixed ran
 
 Automatic Domain Randomization (ADR), introduced by OpenAI for dexterous manipulation, elegantly solves this problem by adapting randomization ranges based on agent performance. When performance exceeds a high threshold, the environment becomes ``too easy'' and ranges expand to increase difficulty. Conversely, when performance drops below a low threshold, ranges contract to make the task more manageable. This creates an automatic curriculum where difficulty increases precisely when the agent is ready, avoiding both underfitting and excessive challenge.
 
-In this work, we implement ADR for the MuJoCo Hopper locomotion task and conduct a systematic evaluation comparing it against both baseline training (no randomization) and traditional UDR. Our implementation randomizes three physical properties---link masses, joint damping, and surface friction---and achieves final randomization ranges of $\pm70\%$, far exceeding typical values reported in the literature.
+In this work, we implement ADR for the MuJoCo Hopper locomotion task and conduct a systematic evaluation comparing it against both baseline training (no randomization) and traditional UDR. Our implementation randomizes three physical properties---link masses, joint damping, and surface friction---and investigates how training duration affects the robustness-performance tradeoff. All experiments use a fixed random seed (42) to ensure reproducibility.
 
 \section{Related Work}
 
-The sim-to-real transfer problem has been extensively studied in the robotics and reinforcement learning communities. Domain randomization was popularized by Tobin et al. for visual tasks, demonstrating that policies trained on randomized synthetic images could transfer successfully to real cameras. The approach was subsequently extended to dynamics randomization by Peng et al., who showed that randomizing physical parameters could improve transfer for robotic manipulation.
+The sim-to-real transfer problem has been extensively studied in the robotics and reinforcement learning communities. Domain randomization was popularized by Tobin et al.~\cite{tobin2017} for visual tasks, demonstrating that policies trained on randomized synthetic images could transfer successfully to real cameras. The approach was subsequently extended to dynamics randomization by Peng et al.~\cite{peng2018}, who showed that randomizing physical parameters could improve transfer for robotic manipulation.
 
-For locomotion specifically, Tan et al. achieved successful sim-to-real transfer for quadruped robots by randomizing friction coefficients and introducing latency randomization during training. Their work demonstrated that even simple uniform randomization could significantly improve real-world performance when applied to the right set of parameters.
+For locomotion specifically, Tan et al.~\cite{tan2018} achieved successful sim-to-real transfer for quadruped robots by randomizing friction coefficients and introducing latency randomization during training. Their work demonstrated that even simple uniform randomization could significantly improve real-world performance when applied to the right set of parameters.
 
-The concept of automatic curriculum learning in RL predates ADR. However, OpenAI's work on solving Rubik's cube with a robot hand brought ADR to prominence by demonstrating that automatic difficulty adjustment could achieve unprecedented dexterity through an emergent curriculum. Their system progressively expanded randomization ranges over the course of training, eventually achieving robustness to variations that would have been impossible to learn from scratch.
+The concept of automatic curriculum learning in RL predates ADR. However, OpenAI's work on solving Rubik's cube with a robot hand~\cite{openai2019} brought ADR to prominence by demonstrating that automatic difficulty adjustment could achieve unprecedented dexterity through an emergent curriculum. Their system progressively expanded randomization ranges over the course of training, eventually achieving robustness to variations that would have been impossible to learn from scratch.
 
 \section{Method}
 
@@ -69,100 +66,128 @@ Following the standard sim-to-real protocol, we define a source environment with
 
 Our ADR implementation maintains a state vector $\mathcal{S} = \{\delta_m, \delta_d, \delta_f\}$ representing the current randomization ranges for mass, damping, and friction respectively. Each $\delta \in [0, 1]$ specifies the fractional variation applied during training; for instance, $\delta_m = 0.3$ means masses are sampled uniformly from $[0.7m_0, 1.3m_0]$ where $m_0$ is the nominal value.
 
-At each policy update, we compute the mean episodic reward $\bar{R}$ over the most recent episodes. The update rule is simple: if $\bar{R} \geq R_{high}$, all ranges increase by a fixed step $\epsilon = 0.05$; if $\bar{R} < R_{low}$, they decrease by $\epsilon$; otherwise they remain unchanged. We set $R_{high} = 1200$ and $R_{low} = 600$ based on preliminary experiments with the Hopper environment.
+At each policy update, we compute the mean episodic reward $\bar{R}$ over the most recent episodes. The update rule is simple: if $\bar{R} \geq R_{high}$, all ranges increase by a fixed step $\epsilon = 0.05$; if $\bar{R} < R_{low}$, they decrease by $\epsilon$; otherwise they remain unchanged.
+
+The threshold values $R_{high} = 1200$ and $R_{low} = 600$ were selected based on observed training dynamics. During early training phases, we noted that untrained policies achieve rewards below 500, while policies that have learned stable locomotion consistently exceed 1000. We set $R_{high} = 1200$ to trigger expansion only when the policy demonstrates solid mastery of the current difficulty level. The lower threshold $R_{low} = 600$ was chosen to detect performance degradation before complete collapse, allowing the system to reduce difficulty when the agent struggles. The 600-point neutral zone between thresholds provides stability, preventing oscillation between expansion and contraction during normal training fluctuations.
 
 This mechanism creates an implicit curriculum. Early in training, when the policy is weak, ranges start at zero and the task is relatively easy. As the agent improves and surpasses the high threshold, difficulty gradually increases through expanded randomization. If performance degrades due to excessive difficulty, ranges contract automatically, preventing the learning collapse observed with overly aggressive uniform randomization.
 
 \subsection{Training Details}
 
-We use Proximal Policy Optimization (PPO) with default hyperparameters as our base algorithm. The ADR callback checks performance every 2048 steps, aligned with PPO's rollout buffer size to ensure stable reward estimates. Total training runs for either 2.5 million timesteps (for comparative experiments) or 5 million timesteps (for maximum robustness evaluation). All experiments use TensorBoard logging for monitoring ADR evolution.
+We use Proximal Policy Optimization (PPO)~\cite{schulman2017} with default hyperparameters as our base algorithm. The ADR callback checks performance every 2048 steps, aligned with PPO's rollout buffer size to ensure stable reward estimates. All experiments use a fixed random seed (42) for reproducibility. We train five different configurations for comparison:
+
+\begin{itemize}
+    \item \textbf{Baseline}: No domain randomization, 2.5M timesteps
+    \item \textbf{UDR}: Uniform randomization with fixed $\pm30\%$ ranges, 2.5M timesteps
+    \item \textbf{ADR 2.5M}: Automatic Domain Randomization, 2.5M timesteps
+    \item \textbf{ADR 5M}: Automatic Domain Randomization, 5M timesteps
+    \item \textbf{ADR 10M}: Automatic Domain Randomization, 10M timesteps
+\end{itemize}
+
+All experiments use TensorBoard logging for monitoring training progress and ADR evolution. Each model is evaluated on 50 episodes per environment to ensure statistical significance.
 
 \section{Experiments and Results}
 
 \subsection{ADR Training Dynamics}
 
-Our primary experiment trained for 5 million timesteps with ADR enabled. The training exhibited distinct phases that reveal the self-organizing nature of the curriculum. During the first 300,000 steps, ADR ranges remained at zero as the agent learned basic locomotion. Once mean reward exceeded 1200, a rapid expansion phase began: eleven consecutive expansions occurred within approximately 80,000 steps, bringing ranges from 0\% to 55\%.
+Figure~\ref{fig:training} shows the ADR range expansion over training. Both the 2.5M and 5M runs achieved a final range of $\pm60\%$, while the 10M run plateaued at $\pm40\%$. This counterintuitive result suggests that longer training does not necessarily lead to higher ADR ranges; instead, the stochastic nature of the expansion process and the agent's learning trajectory play significant roles.
 
-The training then entered a prolonged consolidation phase lasting roughly 3 million steps. During this period, no expansions or contractions occurred as the agent hovered near the expansion threshold without consistently exceeding it. This plateau suggests that 55\% randomization represented a significant challenge requiring extended learning to master.
-
-Finally, in the last 1.5 million steps, three additional expansions pushed ranges to the final value of 70\%. The complete absence of contractions throughout training---fourteen expansions with zero contractions---indicates robust learning without catastrophic forgetting or instability. Figure~\ref{fig:training} illustrates these dynamics.
+The training exhibited distinct phases across all ADR runs. During the initial phase, ranges remained at zero as the agent learned basic locomotion. Once mean reward exceeded 1200, rapid expansion began. The 2.5M and 5M runs experienced aggressive early expansion, while the 10M run showed more gradual, steady growth with eventual stabilization.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{figures/training_curves.png}
-\caption{Left: ADR range expansion over training, showing the step-wise increase from 0\% to 70\%. Right: Mean episode reward during training, with dashed lines indicating expansion (1200) and contraction (600) thresholds.}
+\caption{Left: ADR range expansion over training for different training durations. Right: Mean episode reward during training, with the dashed line indicating the expansion threshold (1200).}
 \label{fig:training}
 \end{figure}
 
-\subsection{Final Performance}
-
-Table~\ref{tab:adr5m} presents the evaluation results for the 5M ADR model. The most striking finding is the inverse transfer gap: target performance actually exceeds source performance by 65\%. This counterintuitive result makes sense upon reflection. The source environment during evaluation samples from the full $\pm70\%$ randomization range, creating highly challenging scenarios. The target environment, with fixed nominal dynamics, is comparatively predictable. A policy trained to handle extreme variations finds the stable target environment easy.
-
-\begin{table}[htbp]
-\caption{ADR 5M Training Results}
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Metric} & \textbf{Source} & \textbf{Target} \\
-\midrule
-Mean Reward & $996 \pm 471$ & $\mathbf{1647 \pm 113}$ \\
-Final ADR Range & \multicolumn{2}{c}{$\pm 70\%$} \\
-Total Expansions & \multicolumn{2}{c}{14} \\
-Contractions & \multicolumn{2}{c}{0} \\
-\bottomrule
-\end{tabular}
-\label{tab:adr5m}
-\end{center}
-\end{table}
-
-The high variance on source ($\pm471$) reflects the wide range of difficulty levels sampled during evaluation, while the low variance on target ($\pm113$) confirms consistent performance in the fixed-dynamics setting.
-
 \subsection{Comparative Analysis}
 
-\TODO{Complete after baseline and UDR training}
-
-To contextualize our ADR results, we compare against two baselines: standard training without any randomization, and Uniform Domain Randomization with fixed $\pm30\%$ ranges. Table~\ref{tab:comparison} shows the expected results.
+Table~\ref{tab:comparison} presents the main evaluation results across all five training configurations. Each model was evaluated on 50 episodes in both source and target environments with clean (non-randomized) dynamics for fair comparison.
 
 \begin{table}[htbp]
-\caption{Comparative Results (2.5M timesteps)}
+\caption{Comparative Results (50 evaluation episodes, seed=42)}
 \begin{center}
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
 \textbf{Method} & \textbf{Source} & \textbf{Target} & \textbf{Gap} \\
 \midrule
-Baseline & \PLACEHOLDER{XXX} & \PLACEHOLDER{XXX} & \PLACEHOLDER{-ZZ\%} \\
-UDR & \PLACEHOLDER{XXX} & \PLACEHOLDER{XXX} & \PLACEHOLDER{-ZZ\%} \\
-ADR & \PLACEHOLDER{XXX} & \PLACEHOLDER{XXX} & \PLACEHOLDER{+ZZ\%} \\
+Baseline & $1778 \pm 65$ & $1169 \pm 95$ & $-34.2\%$ \\
+UDR & $1660 \pm 10$ & $\mathbf{1725 \pm 34}$ & $\mathbf{+3.9\%}$ \\
+ADR 2.5M & $1567 \pm 7$ & $1533 \pm 133$ & $-2.1\%$ \\
+ADR 5M & $1013 \pm 224$ & $781 \pm 139$ & $-22.9\%$ \\
+ADR 10M & $1462 \pm 39$ & $1457 \pm 145$ & $-0.4\%$ \\
 \bottomrule
 \end{tabular}
 \label{tab:comparison}
 \end{center}
 \end{table}
 
-The baseline is expected to show the traditional reality gap pattern: strong source performance but degraded transfer to target. UDR should partially close this gap through its fixed randomization. ADR should achieve the best transfer, with the adaptive curriculum enabling higher final robustness. Figure~\ref{fig:comparison} provides a visual comparison of the final performance across all methods.
+Several key observations emerge from these results. First, the baseline exhibits the classical reality gap with a significant $-34.2\%$ degradation when transferring to the target domain. This confirms that without any form of domain randomization, policies overfit to the specific dynamics of the training environment.
+
+Second, UDR achieves the best transfer performance with a $+3.9\%$ positive gap and remarkably low source variance ($\pm10$). The fixed $\pm30\%$ randomization range appears to be well-calibrated for this task, providing sufficient robustness without excessive difficulty.
+
+Third, ADR 10M achieves near-perfect transfer stability with only $-0.4\%$ gap, making it the most stable transfer option despite not having the highest absolute performance. The low variance ($\pm39$ on source) indicates consistent behavior.
+
+Fourth, ADR 5M shows unexpectedly poor performance ($-22.9\%$ gap). Despite reaching $\pm60\%$ ADR range, the model struggled during evaluation, possibly due to the aggressive randomization affecting its ability to perform well on fixed dynamics.
+
+Figure~\ref{fig:comparison} provides a visual comparison of the final performance across all methods.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{figures/final_performance.png}
-\caption{Final performance comparison across training methods. Green bars show source (training) environment performance, red bars show target (transfer) environment performance. Error bars indicate standard deviation over 30 evaluation episodes.}
+\caption{Final performance comparison across training methods. Green bars show source (training) environment performance, red bars show target (transfer) environment performance. Error bars indicate standard deviation over 50 evaluation episodes.}
 \label{fig:comparison}
 \end{figure}
 
+\subsection{Robustness Evaluation}
+
+To better understand the behavior of ADR models under randomized conditions, we evaluated them with randomized source environments (UDR enabled), simulating the challenging conditions they were trained under. Table~\ref{tab:robustness} presents these results.
+
+\begin{table}[htbp]
+\caption{ADR Robustness Evaluation (randomized source, 50 episodes)}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Source (UDR)} & \textbf{Target} & \textbf{Gap} \\
+\midrule
+ADR 2.5M & $1542 \pm 125$ & $1541 \pm 124$ & $-0.1\%$ \\
+ADR 5M & $804 \pm 167$ & $743 \pm 110$ & $-7.6\%$ \\
+ADR 10M & $1488 \pm 149$ & $\mathbf{1533 \pm 126}$ & $\mathbf{+3.0\%}$ \\
+\bottomrule
+\end{tabular}
+\label{tab:robustness}
+\end{center}
+\end{table}
+
+Under randomized evaluation, ADR 10M shows positive transfer gap ($+3.0\%$), demonstrating excellent robustness when evaluated in conditions similar to its training environment. ADR 2.5M achieves near-perfect balance ($-0.1\%$), while ADR 5M continues to show degraded performance, confirming that its high ADR range may have led to overly conservative learned behaviors.
+
 \section{Discussion}
 
-The inverse transfer gap observed with ADR has important implications for sim-to-real transfer. Traditional approaches aim to close the gap between source and target performance, accepting some degradation during transfer as inevitable. Our results suggest that with sufficient training and adaptive difficulty, the gap can actually reverse. The policy becomes so robust that the ``real world'' is easier than the challenging training distribution.
+Our experiments reveal nuanced insights about domain randomization strategies. The most significant finding is that UDR with well-calibrated fixed ranges ($\pm30\%$) outperforms ADR on this task, achieving $+3.9\%$ positive transfer with minimal variance. This suggests that when appropriate ranges are known, the simplicity of UDR may be preferable.
 
-The plateau phenomenon during training reveals the self-pacing nature of ADR. The system naturally slows down when difficulty becomes excessive, spending millions of steps consolidating before attempting further expansion. This behavior could not be achieved with fixed curriculum schedules and highlights the value of automatic adaptation.
+However, ADR 10M demonstrates a compelling advantage: exceptional transfer stability ($-0.4\%$ gap) with low variance. For applications where consistent performance across deployment conditions is critical, ADR 10M provides the most reliable behavior despite lower absolute reward.
 
-The complete absence of contractions indicates that our threshold settings were appropriate for the Hopper task. In more challenging domains or with more aggressive initialization, we might expect to see oscillation between expansion and contraction as the agent explores the boundary of its capabilities.
+The poor performance of ADR 5M ($-22.9\%$ gap) is surprising given its $\pm60\%$ ADR range matching ADR 2.5M. This may be attributed to the specific learning trajectory during training, where the policy may have developed overly conservative strategies that work under extreme randomization but underperform on fixed dynamics.
+
+The baseline's severe reality gap ($-34.2\%$) confirms the fundamental importance of domain randomization for sim-to-real transfer. Without any form of parameter variation during training, policies fail catastrophically when dynamics differ from the training environment.
+
+ADR range expansion is not strictly monotonic with training duration: ADR 10M achieved only $\pm40\%$ while ADR 2.5M and 5M both reached $\pm60\%$. This indicates that the expansion process is highly dependent on the stochastic training trajectory rather than training duration alone.
 
 \section{Conclusion}
 
-We have demonstrated that Automatic Domain Randomization significantly improves sim-to-real transfer for locomotion tasks compared to traditional approaches. Our implementation achieved robustness to $\pm70\%$ parameter variations, with the trained policy actually performing better on the target domain than on the challenging source distribution. The self-organizing curriculum created by ADR avoids both the underfitting of conservative randomization and the learned helplessness of excessive difficulty.
+We have conducted a systematic evaluation of Automatic Domain Randomization for locomotion tasks, comparing it against baseline and uniform randomization approaches across multiple training durations. All experiments used a fixed random seed (42) for reproducibility. Our key findings are:
 
-\TODO{Add final comparative conclusions}
+\begin{enumerate}
+    \item UDR achieves the best transfer performance with $+3.9\%$ positive gap when well-calibrated ranges are available.
+    \item ADR 10M provides the most stable transfer ($-0.4\%$ gap) with low variance, ideal for applications requiring consistent deployment behavior.
+    \item ADR models achieve robustness levels up to $\pm60\%$ parameter variation, though higher ranges do not guarantee better transfer.
+    \item The baseline exhibits significant reality gap ($-34.2\%$), confirming the necessity of domain randomization for successful transfer.
+\end{enumerate}
 
-Future work should explore application to real robot hardware, extension to more complex morphologies, and investigation of asymmetric parameter ranges for different physical properties.
+These results suggest that practitioners should carefully consider their specific requirements: UDR for maximum transfer performance when ranges are known, and ADR 10M for maximum stability when consistent behavior is paramount.
+
+Future work should explore application to real robot hardware, investigation of asymmetric parameter ranges for different physical properties, and development of early stopping criteria based on transfer performance estimation.
 
 \section*{Acknowledgment}
 

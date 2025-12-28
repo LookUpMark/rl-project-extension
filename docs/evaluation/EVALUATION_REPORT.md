@@ -1,26 +1,25 @@
 # Automatic Domain Randomization (ADR) Evaluation Report
 
 **Project:** Sim-to-Real Hopper with ADR Extension  
-**Date:** December 27, 2024  
-**Training Duration:** ~3.5 hours (5M timesteps)  
-**Model:** `logs/ppo_hopper_adr_final.zip`
+**Date:** December 28, 2024  
+**Seed:** 42 (fixed for reproducibility)  
+**Models:** `logs/baseline/`, `logs/udr/`, `logs/adr/`
 
 ---
 
 ## Executive Summary
 
-This report presents the results of training a PPO agent on the MuJoCo Hopper environment using Automatic Domain Randomization (ADR). The goal was to create a robust policy capable of transferring from simulation to reality by progressively increasing environmental difficulty during training.
+This report presents the final results of training PPO agents on the MuJoCo Hopper environment using different domain randomization strategies. All experiments use a fixed random seed (42) for reproducibility.
 
 ### Key Results
 
-| Metric | Value |
-|--------|-------|
-| **Final ADR Range** | ±70% on all parameters |
-| **Total Expansions** | 14 |
-| **Total Contractions** | 0 |
-| **Source Reward** | 996.48 ± 471.44 |
-| **Target Reward** | 1647.09 ± 112.52 |
-| **Sim-to-Real Gap Reduction** | Target outperforms Source by 65% |
+| Method | Source | Target | Transfer Gap | ADR Range |
+|--------|--------|--------|--------------|-----------|
+| **Baseline** | 1778 ± 65 | 1169 ± 95 | **-34.2%** | N/A |
+| **UDR** | 1660 ± 10 | 1725 ± 34 | **+3.9%** | ±30% fixed |
+| **ADR 2.5M** | 1567 ± 7 | 1533 ± 133 | -2.1% | ±60% |
+| **ADR 5M** | 1013 ± 224 | 781 ± 139 | -22.9% | ±60% |
+| **ADR 10M** | 1462 ± 39 | 1457 ± 145 | **-0.4%** | ±40% |
 
 ---
 
@@ -28,13 +27,12 @@ This report presents the results of training a PPO agent on the MuJoCo Hopper en
 
 ### 1.1 Environment Setup
 
-The training utilized a custom Hopper environment (`CustomHopper`) extended with ADR capabilities:
-
 ```
-Environment: CustomHopper-source-v0
+Environment: CustomHopper-source-v0 / CustomHopper-target-v0
 Observation Space: Box(-inf, inf, (11,), float64)
 Action Space: Box(-1.0, 1.0, (3,), float32)
-Initial Dynamics: [2.66, 4.06, 2.78, 5.32] (body masses)
+Source Dynamics: Torso mass -1kg offset (simulates misspecified model)
+Target Dynamics: Correct nominal values
 ```
 
 ### 1.2 ADR Parameters
@@ -45,235 +43,173 @@ Initial Dynamics: [2.66, 4.06, 2.78, 5.32] (body masses)
 | `threshold_low` | 600 | Reward threshold for contraction |
 | `adr_step_size` | 0.05 | Increment per expansion (5%) |
 | `check_freq` | 2048 | Steps between ADR checks |
-| `min_friction_floor` | 0.3 | Minimum allowed friction coefficient |
 
-### 1.3 PPO Hyperparameters
+### 1.3 Reproducibility
 
-| Parameter | Value |
-|-----------|-------|
-| Policy | MlpPolicy |
-| Total Timesteps | 5,000,000 |
-| Learning Rate | 0.0003 |
-| Batch Size | 2048 (default) |
-| Tensorboard Logging | Enabled |
+All experiments use:
+- **Seed:** 42
+- **NumPy seed:** 42
+- **PyTorch seed:** 42
+- **CUDA deterministic:** True
 
 ---
 
-## 2. ADR Evolution Analysis
+## 2. Training Summary
 
-### 2.1 Expansion Timeline
+### 2.1 Models Trained
 
-The ADR system performed **14 expansions** throughout training, with **zero contractions**, indicating consistently strong performance above the contraction threshold.
+| Model | Timesteps | Training Time | Log Directory |
+|-------|-----------|---------------|---------------|
+| Baseline | 2,500,000 | ~2h 38m | `logs/baseline/PPO_1/` |
+| UDR | 2,500,000 | ~2h 38m | `logs/udr/PPO_1/` |
+| ADR 2.5M | 2,500,000 | ~2h 38m | `logs/adr/run_2_5M/PPO_1/` |
+| ADR 5M | 5,000,000 | ~4h 03m | `logs/adr/run_5M/PPO_1/` |
+| ADR 10M | 10,000,000 | ~6h 15m | `logs/adr/run_10M/PPO_1/` |
 
-#### Expansion Events
+### 2.2 ADR Range Evolution
 
-| # | Step | ADR Range | Mean Reward |
-|---|------|-----------|-------------|
-| 1 | 309,248 | 0.05 | 1,215 |
-| 2 | 311,296 | 0.10 | 1,211 |
-| 3 | 313,344 | 0.15 | 1,206 |
-| 4 | 366,592 | 0.20 | 1,206 |
-| 5 | 368,640 | 0.25 | 1,217 |
-| 6 | 370,688 | 0.30 | 1,208 |
-| 7 | 372,736 | 0.35 | 1,218 |
-| 8 | 374,784 | 0.40 | 1,212 |
-| 9 | 376,832 | 0.45 | 1,213 |
-| 10 | 378,880 | 0.50 | 1,225 |
-| 11 | 380,928 | 0.55 | 1,216 |
-| 12 | 3,528,704 | 0.60 | 1,205 |
-| 13 | 3,530,752 | 0.65 | 1,208 |
-| 14 | 3,532,800 | 0.70 | 1,213 |
+| Model | Final ADR Range | Final Reward (training) |
+|-------|-----------------|-------------------------|
+| ADR 2.5M | ±60% | 989 |
+| ADR 5M | ±60% | 749 |
+| ADR 10M | ±40% | 1016 |
 
-### 2.2 Training Phases
-
-The training naturally divided into distinct phases:
-
-#### Phase 1: Base Learning (0 - 300k steps)
-- **Reward Range:** 11 → 1,200
-- **ADR Range:** 0.00 (no randomization)
-- **Behavior:** Agent learned basic locomotion without disturbances
-
-#### Phase 2: Rapid Expansion (300k - 400k steps)
-- **Expansions:** 11 (from 0.00 to 0.55)
-- **Characteristic:** Once threshold was reached, rapid consecutive expansions
-- **Notable:** All 11 expansions occurred within ~80k steps
-
-#### Phase 3: Plateau (400k - 3.5M steps)
-- **Expansions:** 0
-- **ADR Range:** Stable at 0.55
-- **Behavior:** Agent struggled to consistently exceed 1200 reward with ±55% randomization
-- **Duration:** ~3.1M steps (62% of total training)
-
-#### Phase 4: Final Push (3.5M - 5M steps)
-- **Expansions:** 3 (from 0.55 to 0.70)
-- **Observation:** After extended training, agent finally mastered 0.55 range and expanded further
-- **Final Range:** 0.70 (±70%)
-
-### 2.3 Reward Statistics
-
-| Statistic | Value |
-|-----------|-------|
-| Minimum Reward | 11.5 |
-| Maximum Reward | 1,236.6 |
-| Mean Reward | 951.5 |
-| Final Reward | 997.4 |
-
-The reward distribution shows that the agent maintained above-threshold performance despite increasingly chaotic environments.
+**Note:** ADR range is not monotonic with training duration. The stochastic nature of expansion depends on the agent's learning trajectory.
 
 ---
 
-## 3. Final Evaluation Results
+## 3. Evaluation Results
 
-### 3.1 Performance Comparison
+### 3.1 Standard Evaluation (Clean Source)
 
-| Environment | Mean Reward | Std Dev | Episodes |
-|-------------|-------------|---------|----------|
-| **Source** (with ADR) | 996.48 | ±471.44 | 50 |
-| **Target** (clean) | 1,647.09 | ±112.52 | 50 |
+All models evaluated on 50 episodes with `udr=False` for fair comparison.
 
-### 3.2 Analysis
+| Method | Source | Target | Gap |
+|--------|--------|--------|-----|
+| Baseline | 1778 ± 65 | 1169 ± 95 | -34.2% |
+| UDR | 1660 ± 10 | **1725 ± 34** | **+3.9%** |
+| ADR 2.5M | 1567 ± 7 | 1533 ± 133 | -2.1% |
+| ADR 5M | 1013 ± 224 | 781 ± 139 | -22.9% |
+| ADR 10M | 1462 ± 39 | 1457 ± 145 | -0.4% |
 
-#### Source Environment Performance
-- High variance (±471) is expected due to extreme randomization (±70%)
-- Mean reward of ~1000 demonstrates competence even in worst-case scenarios
-- The agent successfully navigates environments where:
-  - Mass varies by ±70%
-  - Damping varies by ±70%
-  - Friction varies by ±70%
+### 3.2 Robustness Evaluation (Randomized Source)
 
-#### Target Environment Performance
-- **65% improvement** over Source performance
-- Very low variance (±112) indicates highly stable policy
-- The "real world" (Target) is effectively easier than training conditions
-- This is the desired outcome of ADR: training in chaos produces stability in normal conditions
+ADR models evaluated with `udr=True` on source to simulate training conditions.
 
-### 3.3 Sim-to-Real Gap Analysis
-
-Traditional RL training on the Source environment typically shows:
-- High Source performance
-- Degraded Target performance (sim-to-real gap)
-
-With ADR, we observe the **inverse pattern**:
-- Moderate Source performance (due to high difficulty)
-- Superior Target performance (target is "easy" compared to training)
-
-This inversion demonstrates successful domain randomization.
+| Model | Source (UDR) | Target | Gap |
+|-------|--------------|--------|-----|
+| ADR 2.5M | 1542 ± 125 | 1541 ± 124 | -0.1% |
+| ADR 5M | 804 ± 167 | 743 ± 110 | -7.6% |
+| ADR 10M | 1488 ± 149 | **1533 ± 126** | **+3.0%** |
 
 ---
 
-## 4. Robustness Metrics
+## 4. Analysis
 
-### 4.1 Final ADR Ranges
+### 4.1 Baseline: Reality Gap Confirmed
 
-| Parameter | Final Range | Physical Meaning |
-|-----------|-------------|------------------|
-| Mass | ±70% | Robot can weigh 30% to 170% of nominal |
-| Damping | ±70% | Joint resistance varies significantly |
-| Friction | ±70% | Surface grip ranges from slippery to sticky |
+- **-34.2% transfer gap** demonstrates the classic sim-to-real problem
+- Policy overfits to training dynamics and fails on target
+- This confirms the necessity of domain randomization
 
-### 4.2 Robustness Rating
+### 4.2 UDR: Best Transfer Performance
 
-Based on achieved ADR ranges:
+- **+3.9% positive transfer** with remarkably low variance (±10 on source)
+- The fixed ±30% range is well-calibrated for this task
+- Simple and effective when ranges are known a priori
 
-| Range | Rating | Typical Use Case |
-|-------|--------|------------------|
-| 0-20% | Basic | Lab conditions |
-| 20-40% | Good | Controlled deployment |
-| 40-60% | Strong | Variable real-world |
-| **60%+** | **Exceptional** | **Extreme variations** |
+### 4.3 ADR 10M: Best Transfer Stability
 
-**This training achieved ±70%, rated as EXCEPTIONAL.**
+- **-0.4% gap** is essentially zero transfer degradation
+- Low variance (±39 on source) indicates consistent behavior
+- Best choice when deployment stability is critical
 
-### 4.3 Comparison with Literature
+### 4.4 ADR 5M: Unexpected Poor Performance
 
-| Paper | Task | Final Range |
-|-------|------|-------------|
-| OpenAI Rubik's Cube (2019) | Dexterous manipulation | ~50-60% |
-| Sim-to-Real Locomotion (2018) | Quadruped walking | ~30-40% |
-| **This Work** | **Hopper locomotion** | **70%** |
+- Despite reaching ±60% ADR range, shows -22.9% gap
+- Possible over-robustification: learned overly conservative strategies
+- High variance indicates unstable behavior on fixed dynamics
 
 ---
 
 ## 5. Conclusions
 
-### 5.1 What Worked
+### 5.1 Key Findings
 
-1. **ADR Implementation:** The feedback loop between performance and difficulty worked exactly as designed
-2. **Threshold Calibration:** Setting thresholds at 1200/600 (vs original 2000/1000) enabled meaningful expansion
-3. **Extended Training:** 5M steps allowed the agent to overcome the 0.55 plateau
-4. **Zero Contractions:** The agent never fell below performance limits, indicating robust learning
+1. **UDR wins on transfer performance** when ranges are well-calibrated
+2. **ADR 10M wins on stability** with near-zero transfer gap
+3. **Higher ADR range ≠ better transfer** (ADR 5M with 60% underperforms)
+4. **Baseline confirms necessity** of domain randomization (-34.2% gap)
 
-### 5.2 Key Insights
+### 5.2 Recommendations
 
-1. **Plateau Phenomenon:** Most training time (62%) was spent consolidating at 0.55 range
-2. **Batch Expansion:** Once capable, the agent expanded rapidly (11 expansions in 80k steps)
-3. **Diminishing Returns:** Later expansions required significantly more training time
-4. **Target > Source:** Strong evidence that ADR produces generalizable policies
+| Use Case | Recommended Method |
+|----------|-------------------|
+| Maximum transfer performance | UDR with tuned ranges |
+| Maximum transfer stability | ADR 10M |
+| Unknown target dynamics | ADR (any duration) |
+| Quick experiments | Baseline (but expect gap) |
 
-### 5.3 Recommendations for Future Work
+### 5.3 Future Work
 
-1. **Adaptive Thresholds:** Consider lowering `threshold_high` as range increases
-2. **Asymmetric Ranges:** Different parameters may need different max ranges
-3. **Curriculum Insights:** The plateau phase suggests intermediate checkpoints could be valuable
-4. **10M Training:** Could potentially reach 80-85% range, but with diminishing returns
+1. Investigate why ADR 5M underperforms despite high range
+2. Develop early stopping criteria based on transfer estimation
+3. Apply to real robot hardware for validation
 
 ---
 
-## 6. Technical Appendix
+## 6. Artifacts
 
-### 6.1 Bug Fix Applied
+### 6.1 Saved Models
 
-During verification, a critical bug was found in `sample_parameters()`:
+| Model | Path |
+|-------|------|
+| Baseline | `logs/baseline/ppo_hopper_baseline.zip` |
+| UDR | `logs/udr/ppo_hopper_udr.zip` |
+| ADR 2.5M | `logs/adr/ppo_hopper_adr_2_5M.zip` |
+| ADR 5M | `logs/adr/ppo_hopper_adr_5M.zip` |
+| ADR 10M | `logs/adr/ppo_hopper_adr_10M.zip` |
 
-```python
-# BEFORE (incorrect):
-low = max(fric * (1.0 - friction_range), self.min_friction_floor)
+### 6.2 Figures
 
-# AFTER (correct):
-low = np.maximum(fric * (1.0 - friction_range), self.min_friction_floor)
+| Figure | Path |
+|--------|------|
+| Training Curves | `docs/evaluation/figures/training_curves.png` |
+| Learning Curves | `docs/evaluation/figures/learning_curves.png` |
+| Final Performance | `docs/evaluation/figures/final_performance.png` |
+| Robustness | `docs/evaluation/figures/robustness_performance.png` |
+
+### 6.3 LaTeX Table
+
+```latex
+\input{docs/evaluation/figures/results_table.tex}
 ```
-
-The issue was that `fric` is a NumPy array (shape 3,), and Python's `max()` cannot compare arrays with scalars. Using `np.maximum()` enables element-wise comparison.
-
-### 6.2 Files Modified
-
-| File | Changes |
-|------|---------|
-| `env/custom_hopper.py` | Fixed `sample_parameters()` friction handling |
-| `callbacks/adr_callback.py` | Calibrated thresholds to 1200/600 |
-| `train.py` | Set 5M timesteps |
-
-### 6.3 Saved Artifacts
-
-| Artifact | Location |
-|----------|----------|
-| Trained Model | `logs/ppo_hopper_adr_final.zip` |
-| Tensorboard Logs | `logs/PPO_1/` |
-| Performance Plot | `performance_comparison_adr.png` |
 
 ---
 
 ## 7. Reproducibility
 
-To reproduce these results:
-
 ```bash
-# 1. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 2. Run training
-python train.py
+# Run training (with seed=42)
+python scripts/train/train_baseline.py
+python scripts/train/train_udr.py
+python scripts/train/train_adr.py --run 2_5M
+python scripts/train/train_adr.py --run 5M
+python scripts/train/train_adr.py --run 10M
 
-# 3. Monitor with Tensorboard
+# Generate comparison charts
+python scripts/test/test_comparison.py
+
+# Monitor with Tensorboard
 tensorboard --logdir ./logs/
-
-# 4. Load trained model
-from stable_baselines3 import PPO
-model = PPO.load("logs/ppo_hopper_adr_final")
 ```
 
 ---
 
-**Report Generated:** December 27, 2024  
-**Training Time:** 3h 28m 17s  
-**Hardware:** CUDA-enabled GPU (with CPU fallback warning)
+**Report Generated:** December 28, 2024  
+**Total Training Time:** ~18 hours  
+**Hardware:** CUDA-enabled GPU  
+**Seed:** 42 (reproducible)

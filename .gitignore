@@ -37,26 +37,9 @@ venv.bak/
 # Jupyter Notebooks
 .ipynb_checkpoints/
 
-# Project Specific
-MUJOCO_LOG.TXT
-*.png
-*.jpg
-*.jpeg
-*.gif
-
-# Model checkpoints
-*.pt
-*.pth
-*.ckpt
-*.h5
-*.pkl
-
 # MuJoCo
 *.mjb
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Old files (migrated to new structure)
-*_old.py
