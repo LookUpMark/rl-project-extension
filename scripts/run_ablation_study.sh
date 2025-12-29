@@ -23,15 +23,15 @@ echo ""
 
 for config in "${CONFIGS[@]}"; do
     echo ">>> Running: $config"
-    python train/train_ablation.py --config "$config"
+    python scripts/train/train_ablation.py --config "$config"
     echo ">>> Completed: $config"
     echo ""
 done
 
 echo "=== ANALYSIS ==="
-python analysis/statistical_analysis.py
-python analysis/plot_ablation.py
-python analysis/auto_select_params.py
+python scripts/analysis/statistical_analysis.py
+python scripts/analysis/plot_ablation.py
+python scripts/analysis/auto_select_params.py
 
 echo ""
 echo "✅ ABLATION COMPLETE"
