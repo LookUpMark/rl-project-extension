@@ -22,27 +22,31 @@ This project extends the standard Hopper-v4 environment to implement ADR (Automa
 
 ```
 ├── env/
-│   ├── custom_hopper.py     # Extended Hopper with ADR + UDR support
-│   └── assets/hopper.xml    # MuJoCo model
+│   ├── custom_hopper.py     # Extended Hopper with ADR + ablation support
+│   └── assets/hopper.xml
 ├── callbacks/
 │   └── adr_callback.py      # ADR training callback
 ├── scripts/
 │   ├── train/
-│   │   ├── train_baseline.py   # Baseline training (no DR)
+│   │   ├── train_baseline.py   # Baseline (no DR)
 │   │   ├── train_udr.py        # Uniform Domain Randomization
-│   │   └── train_adr.py        # Automatic Domain Randomization
-│   └── test/
-│       ├── test_comparison.py  # Generate comparison charts
-│       └── test_random_policy.py
-├── logs/                    # Trained models & Tensorboard logs
+│   │   ├── train_adr.py        # Automatic Domain Randomization
+│   │   ├── train_ablation.py   # Part 2: Ablation study
+│   │   └── train_optimal.py    # Part 2: Train with optimal params
+│   ├── test/
+│   │   └── test_comparison.py
+│   ├── analysis/               # Part 2: Statistical analysis
+│   │   ├── statistical_analysis.py
+│   │   ├── plot_ablation.py
+│   │   └── auto_select_params.py
+│   └── run_ablation_study.sh   # Run all 8 configurations
+├── logs/
+├── configs/                    # Auto-generated optimal configs
 ├── docs/
 │   ├── evaluation/
-│   │   ├── paper-draft.tex     # Research paper
-│   │   ├── EVALUATION_REPORT.md
-│   │   └── figures/            # Generated charts
 │   └── implementation/
 │       ├── IMPLEMENTATION.md
-│       └── MEMBER-2.md
+│       └── PART2_IMPLEMENTATION.md
 └── requirements.txt
 ```
 

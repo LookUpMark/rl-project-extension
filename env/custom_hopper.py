@@ -98,6 +98,9 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
         self.adr_state = {"mass_range": 0.0, "damping_range": 0.0, "friction_range": 0.0}
         self.adr_step_size = 0.05
         self.min_friction_floor = 0.3
+        
+        # Ablation support: which parameters are enabled for ADR
+        self.adr_enabled_params = {'mass': True, 'damping': True, 'friction': True}
 
     @property
     def healthy_reward(self):
@@ -186,10 +189,11 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
         self.set_parameters(self.sample_parameters())
 
     def sample_parameters(self):
-        """Sample masses, damping, friction according to ADR state."""
-        mass_range = self.adr_state["mass_range"]
-        damping_range = self.adr_state["damping_range"]
-        friction_range = self.adr_state["friction_range"]
+        """Sample masses, damping, friction according to ADR state and enabled params."""
+        # Only apply range if param is enabled
+        mass_range = self.adr_state["mass_range"] if self.adr_enabled_params.get('mass', True) else 0.0
+        damping_range = self.adr_state["damping_range"] if self.adr_enabled_params.get('damping', True) else 0.0
+        friction_range = self.adr_state["friction_range"] if self.adr_enabled_params.get('friction', True) else 0.0
         
         masses = [np.random.uniform(m * (1 - mass_range), m * (1 + mass_range)) 
                   for m in self.original_masses]
@@ -215,15 +219,19 @@ class CustomHopper(MujocoEnv, utils.EzPickle):
             self.model.body_mass[1:] = task
 
     def update_adr(self, mean_reward: float, low_th: float, high_th: float) -> Tuple[str, Dict]:
-        """Update ADR ranges based on performance. Called by ADRCallback."""
+        """Update ADR ranges based on performance. Only modifies enabled params."""
         status = "stable"
+        param_map = {'mass_range': 'mass', 'damping_range': 'damping', 'friction_range': 'friction'}
+        
         if mean_reward >= high_th:
             for k in self.adr_state:
-                self.adr_state[k] = min(self.adr_state[k] + self.adr_step_size, 1.0)
+                if self.adr_enabled_params.get(param_map[k], True):
+                    self.adr_state[k] = min(self.adr_state[k] + self.adr_step_size, 1.0)
             status = "expanded"
         elif mean_reward < low_th:
             for k in self.adr_state:
-                self.adr_state[k] = max(self.adr_state[k] - self.adr_step_size, 0.0)
+                if self.adr_enabled_params.get(param_map[k], True):
+                    self.adr_state[k] = max(self.adr_state[k] - self.adr_step_size, 0.0)
             status = "contracted"
         return status, self.adr_state.copy()
 
