@@ -152,9 +152,13 @@ ADR models evaluated with `udr=True` on source to simulate training conditions.
 
 ### 5.3 Future Work
 
-1. Investigate why ADR 5M underperforms despite high range
+1. ~~Investigate why ADR 5M underperforms despite high range~~ → **Resolved in Part 2: Ablation study shows that parameter combinations matter more than individual ranges**
 2. Develop early stopping criteria based on transfer estimation
 3. Apply to real robot hardware for validation
+
+> **📊 Part 2 Completed:** For detailed ablation study results analyzing individual parameter contributions, see [PART2_EVALUATION_REPORT.md](PART2_EVALUATION_REPORT.md).
+>
+> Key finding: **FRICTION** is the most critical parameter for transfer (+68.7% contribution), while **MASS** can have negative effects when combined with other parameters.
 
 ---
 

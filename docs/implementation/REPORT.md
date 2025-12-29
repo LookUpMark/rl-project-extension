@@ -242,8 +242,8 @@ class AutomaticDomainRandomizationCallback(BaseCallback):
         
         # Soglie per l'Hopper (da tarare in base ai risultati base)
         # Hopper-v4 solve è circa 3000+, ma in training si punta a progressi incrementali
-        self.threshold_high = 2000  # Se reward > 2000, aumenta difficoltà
-        self.threshold_low = 1000   # Se reward < 1000, diminuisci difficoltà
+        self.threshold_high = 1200  # Se reward >= 1200, aumenta difficoltà
+        self.threshold_low = 600   # Se reward < 600, diminuisci difficoltà
 
     def _on_step(self) -> bool:
         if self.n_calls % self.check_freq == 0:
@@ -288,9 +288,64 @@ Per validare il sistema, si consiglia di lanciare un training di almeno 500k tim
 
 ---
 
-## 5. Conclusione
+## 5. Risultati Sperimentali: PART 2 - Ablation Study
+
+> **NOTA:** Questa sezione riassume i risultati dell'ablation study condotto nella Parte 2 del progetto. Per il report completo, vedere [PART2_EVALUATION_REPORT.md](../evaluation/PART2_EVALUATION_REPORT.md).
+
+### 5.1 Contesto dell'Esperimento
+
+Per rispondere alla domanda "Quali parametri contribuiscono maggiormente al trasferimento?", abbiamo condotto un **ablation study sistematico** testando tutte le 8 combinazioni possibili di MASSA, DAMPING e FRICTION, più baseline e UDR come riferimento.
+
+**Training completato:** 10 configurazioni × 2.5M timesteps ciascuna
+
+### 5.2 Risultati Chiave
+
+| Configurazione | Transfer Gap | Contributo |
+|----------------|--------------|------------|
+| `adr_fric` (solo friction) | **+154.6%** | Best |
+| `adr_all` (tutti) | +14.1% | Buono |
+| `adr_damp` (solo damping) | +8.0% | Buono |
+| `udr` (fixed ±30%) | -0.8% | Neutro |
+| `adr_mass` (solo massa) | -17.5% | Negativo |
+| `baseline` (nessuno) | -66.4% | Worst |
+
+### 5.3 Ranking dei Parametri
+
+L'analisi statistica delle contribuzioni marginali rivela:
+
+| Rank | Parametro | Contribuzione | p-value | Significatività |
+|------|-----------|---------------|---------|-----------------|
+| 1 | **FRICTION** | **+68.70%** | 0.0744 | Marginale (p<0.10) |
+| 2 | MASS | -15.68% | 0.7120 | Non significativo |
+| 3 | DAMPING | -0.86% | 0.9840 | Non significativo |
+
+### 5.4 Scoperta Principale: Effetti Antagonistici
+
+Una scoperta inattesa: combinare MASSA con altri parametri **riduce** la loro efficacia:
+
+- MASS × FRICTION: -94.5% (interazione antagonistica)
+- DAMPING × FRICTION: -106.2% (interazione antagonistica)
+
+**Implicazione pratica:** Randomizzare più parametri non è sempre meglio. La selezione deve essere guidata dai dati.
+
+### 5.5 Raccomandazioni Operative
+
+Basandosi sull'evidenza empirica:
+
+| Scenario | Configurazione Consigliata |
+|----------|---------------------------|
+| Massimo transfer | `adr_fric` (solo friction) |
+| Robustezza bilanciata | `adr_damp_fric` |
+| Approccio conservativo | `udr` (fixed ranges) |
+| **Da evitare** | `adr_mass`, `adr_mass_damp` |
+
+---
+
+## 6. Conclusione
 
 L'estensione proposta eleva il progetto da un semplice esercizio di tuning di parametri a un'implementazione di algoritmi di Meta-Learning allo stato dell'arte. L'Automatic Domain Randomization affronta il problema centrale del Sim-to-Real non cercando di modellare perfettamente la realtà (che è impossibile), ma preparando l'agente a sopravvivere a una distribuzione di realtà sempre più vasta. L'implementazione sinergica su massa, smorzamento e attrito, gestita da un loop di feedback automatico, rappresenta il gold standard per la ricerca attuale nella locomozione robotica e garantisce la massima valorizzazione del progetto in sede d'esame.
+
+**La PART 2 (Ablation Study) ha rivelato che la randomizzazione della FRICTION è il fattore più critico per il trasferimento sim-to-real, mentre la MASSA può avere effetti negativi se combinata con altri parametri.**
 
 ### Riferimenti Bibliografici Chiave
 
