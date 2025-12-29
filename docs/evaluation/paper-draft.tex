@@ -14,14 +14,14 @@
 
 \author{\IEEEauthorblockN{Marc'Antonio Lopez}
 \IEEEauthorblockA{\textit{Department of Control and Computer Engineering} \\
-\textit{Polytechnic University of Turin}\\
-Turin, Italy \\
+\textit{Politecnico di Torino}\\
+Torino, Italy \\
 s336362@studenti.polito.it}
 \and
 \IEEEauthorblockN{Luigi Marguglio}
 \IEEEauthorblockA{\textit{Department of Control and Computer Engineering} \\
-\textit{Polytechnic University of Turin}\\
-Turin, Italy \\
+\textit{Politecnico di Torino}\\
+Torino, Italy \\
 s332575@studenti.polito.it}
 }
 
@@ -176,6 +176,13 @@ The most striking result is that \texttt{adr\_fric} (friction-only randomization
 
 \begin{figure}[htbp]
 \centering
+\includegraphics[width=\columnwidth]{figures/mode_comparison.png}
+\caption{Direct comparison of Baseline, UDR, and Best ADR configuration. Left: absolute performance on source and target. Right: transfer gap comparison.}
+\label{fig:mode_comparison}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
 \includegraphics[width=\columnwidth]{figures/ablation_transfer_gap.png}
 \caption{Transfer gap by configuration. Positive values (green) indicate successful transfer; negative values (red) indicate reality gap.}
 \label{fig:ablation}
@@ -204,6 +211,13 @@ where $\bar{G}$ is the mean transfer gap across relevant configurations.
 \label{tab:contributions}
 \end{center}
 \end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figures/individual_param_impact.png}
+\caption{Box plots showing the impact of each parameter on transfer gap. Configurations with friction enabled show substantially higher transfer performance.}
+\label{fig:param_impact}
+\end{figure}
 
 \textbf{Key Finding:} Friction is the only parameter with a positive marginal contribution, and it is marginally significant at $p < 0.10$. Mass shows a \textit{negative} contribution, meaning adding mass randomization tends to hurt transfer performance.
 
