@@ -55,7 +55,11 @@ Automatic Domain Randomization (ADR), introduced by OpenAI for dexterous manipul
 
 The sim-to-real transfer problem has been extensively studied in the robotics and reinforcement learning communities. Domain randomization was popularized by Tobin et al.~\cite{tobin2017} for visual tasks, demonstrating that policies trained on randomized synthetic images could transfer successfully to real cameras. The approach was subsequently extended to dynamics randomization by Peng et al.~\cite{peng2018}.
 
-For locomotion specifically, Tan et al.~\cite{tan2018} achieved successful sim-to-real transfer for quadruped robots by randomizing friction coefficients and introducing latency randomization during training. OpenAI's work on solving Rubik's cube with a robot hand~\cite{openai2019} brought ADR to prominence by demonstrating that automatic difficulty adjustment could achieve unprecedented dexterity through an emergent curriculum.
+Muratore et al.~\cite{muratore2018} introduced SPOTA (Simulation-based Policy Optimization with Transferability Assessment), providing a principled stopping criterion for domain randomization training based on transferability estimation. Ramos et al.~\cite{ramos2019} proposed BayesSim, a Bayesian framework that computes posterior distributions over simulator parameters, enabling adaptive domain randomization that outperforms uniform priors.
+
+For locomotion specifically, Tan et al.~\cite{tan2018} achieved successful sim-to-real transfer for quadruped robots by randomizing friction coefficients and introducing latency randomization during training. Hwangbo et al.~\cite{hwangbo2019} demonstrated that neural network policies trained in simulation could enable ANYmal robots to perform agile and dynamic motor skills, with careful attention to contact dynamics. Lee et al.~\cite{lee2020} extended this work, showing that proprioceptive controllers trained in simulation achieve zero-shot generalization to challenging natural terrains including mud, snow, and vegetation.
+
+OpenAI's work on solving Rubik's cube with a robot hand~\cite{openai2019} brought ADR to prominence by demonstrating that automatic difficulty adjustment could achieve unprecedented dexterity through an emergent curriculum. Mehta et al.~\cite{mehta2020} proposed Active Domain Randomization, which learns a parameter sampling strategy to prioritize informative environment variations rather than relying on uniform sampling.
 
 Recent work by Gang et al.~\cite{gang2025} investigated the impact of static friction on sim-to-real transfer, finding that friction parameters are often the most critical for locomotion tasks. Our ablation study provides empirical support for this finding.
 
@@ -63,7 +67,7 @@ Recent work by Gang et al.~\cite{gang2025} investigated the impact of static fri
 
 \subsection{Environment and Task}
 
-Our experiments use the MuJoCo Hopper environment, a standard benchmark for locomotion control. The agent observes an 11-dimensional state vector and outputs 3-dimensional continuous torques. We define a source environment with misspecified dynamics (1kg torso mass offset) and a target environment with correct dynamics.
+Our experiments use the MuJoCo~\cite{todorov2012} Hopper environment, a standard benchmark for locomotion control. The agent observes an 11-dimensional state vector and outputs 3-dimensional continuous torques. We define a source environment with misspecified dynamics (1kg torso mass offset) and a target environment with correct dynamics.
 
 \subsection{Automatic Domain Randomization}
 
@@ -256,7 +260,7 @@ Our two-part study reveals several important insights:
 
 \textbf{1. Friction Dominates Transfer Performance.} The exceptional performance of friction-only ADR ($+154.6\%$) can be attributed to:
 \begin{itemize}
-    \item Ground contact is critical for locomotion
+    \item Ground contact is critical for locomotion, as demonstrated by Hwangbo et al.~\cite{hwangbo2019} and Lee et al.~\cite{lee2020}
     \item Friction is often the most misspecified parameter in simulation
     \item Single-parameter ADR allows focused robustness learning
 \end{itemize}
@@ -265,7 +269,7 @@ Our two-part study reveals several important insights:
 \begin{itemize}
     \item The source environment already has a 1kg torso mass offset
     \item Additional mass randomization interferes with this built-in mismatch
-    \item Over-robustification leads to conservative behaviors
+    \item Over-robustification leads to conservative behaviors, consistent with findings by Ramos et al.~\cite{ramos2019} on parameter selection
 \end{itemize}
 
 \textbf{3. More Parameters $\neq$ Better Transfer.} Strong antagonistic interactions mean that randomizing all parameters can be worse than selective randomization. This challenges the common assumption that broader randomization is always beneficial.
@@ -317,6 +321,12 @@ This work was conducted as part of the Robot Learning course at Politecnico di T
 \bibitem{tan2018} J. Tan et al., ``Sim-to-Real: Learning Agile Locomotion For Quadruped Robots,'' RSS, 2018.
 \bibitem{schulman2017} J. Schulman et al., ``Proximal Policy Optimization Algorithms,'' arXiv:1707.06347, 2017.
 \bibitem{gang2025} S. Gang et al., ``Impact of Static Friction on Sim2Real in Robotic Reinforcement Learning,'' 2025.
+\bibitem{mehta2020} B. Mehta, M. Diaz, F. Golemo, C. J. Pal, and L. Paull, ``Active Domain Randomization,'' Proc. Conference on Robot Learning (CoRL), PMLR, 2020.
+\bibitem{muratore2018} F. Muratore, F. Treede, M. Gienger, and J. Peters, ``Domain Randomization for Simulation-Based Policy Optimization with Transferability Assessment,'' Proc. Conference on Robot Learning (CoRL), PMLR 87:700-713, 2018.
+\bibitem{ramos2019} F. Ramos, R. C. Possas, and D. Fox, ``BayesSim: Adaptive Domain Randomization via Probabilistic Inference for Robotics Simulators,'' Robotics: Science and Systems (RSS), 2019.
+\bibitem{hwangbo2019} J. Hwangbo, J. Lee, A. Dosovitskiy, D. Bellicoso, V. Tsounis, V. Koltun, and M. Hutter, ``Learning Agile and Dynamic Motor Skills for Legged Robots,'' Science Robotics, vol. 4, no. 26, 2019.
+\bibitem{lee2020} J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter, ``Learning Quadrupedal Locomotion over Challenging Terrain,'' Science Robotics, vol. 5, no. 47, 2020.
+\bibitem{todorov2012} E. Todorov, T. Erez, and Y. Tassa, ``MuJoCo: A Physics Engine for Model-Based Control,'' IEEE/RSJ Int. Conf. Intelligent Robots and Systems (IROS), 2012.
 \end{thebibliography}
 
 \end{document}
