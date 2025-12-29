@@ -1,0 +1,19 @@
+{
+  "config_name": "udr",
+  "mode": "udr",
+  "config": {
+    "mass": true,
+    "damping": true,
+    "friction": true,
+    "mode": "udr"
+  },
+  "seed": 42,
+  "timesteps": 2500000,
+  "source_mean": 1723.795046,
+  "source_std": 9.946912139096803,
+  "target_mean": 1710.630274350643,
+  "target_std": 104.24448910969005,
+  "transfer_gap": -0.7637086369348406,
+  "final_adr_state": {},
+  "timestamp": "2025-12-29T11:56:41.204076"
+}

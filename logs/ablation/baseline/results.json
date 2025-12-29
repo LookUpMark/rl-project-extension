@@ -1,0 +1,19 @@
+{
+  "config_name": "baseline",
+  "mode": "baseline",
+  "config": {
+    "mass": false,
+    "damping": false,
+    "friction": false,
+    "mode": "baseline"
+  },
+  "seed": 42,
+  "timesteps": 2500000,
+  "source_mean": 933.08355908,
+  "source_std": 212.7405731878964,
+  "target_mean": 313.93915758609774,
+  "target_std": 223.9553205434299,
+  "transfer_gap": -66.35465767978647,
+  "final_adr_state": {},
+  "timestamp": "2025-12-29T11:25:39.567184"
+}

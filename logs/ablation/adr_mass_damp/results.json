@@ -1,0 +1,23 @@
+{
+  "config_name": "adr_mass_damp",
+  "mode": "adr",
+  "config": {
+    "mass": true,
+    "damping": true,
+    "friction": false,
+    "mode": "adr"
+  },
+  "seed": 42,
+  "timesteps": 2500000,
+  "source_mean": 948.5919654200001,
+  "source_std": 51.534354587618026,
+  "target_mean": 647.7533794713021,
+  "target_std": 28.87588093546792,
+  "transfer_gap": -31.714224547063104,
+  "final_adr_state": {
+    "mass_range": 1.0,
+    "damping_range": 1.0,
+    "friction_range": 0.0
+  },
+  "timestamp": "2025-12-29T14:31:23.969763"
+}

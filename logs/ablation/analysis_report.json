@@ -1,0 +1,56 @@
+{
+  "summary": {
+    "total_configurations": 10,
+    "best_config": "adr_fric",
+    "best_transfer_gap": 154.63635813407237,
+    "worst_config": "baseline",
+    "worst_transfer_gap": -66.35465767978647
+  },
+  "parameter_contributions": {
+    "mass": {
+      "marginal_contribution": -15.682191269440844,
+      "mean_with_param": -8.083015193359973,
+      "mean_without_param": 7.599176076080871,
+      "t_statistic": -0.3825081887409157,
+      "p_value": 0.7120464706379881,
+      "significant": "False"
+    },
+    "damping": {
+      "marginal_contribution": -0.8559644160427407,
+      "mean_with_param": -0.6699017666609223,
+      "mean_without_param": 0.18606264938181843,
+      "t_statistic": -0.020690252020770974,
+      "p_value": 0.9839994838909498,
+      "significant": "False"
+    },
+    "friction": {
+      "marginal_contribution": 68.70018366995433,
+      "mean_with_param": 34.10817227633761,
+      "mean_without_param": -34.592011393616716,
+      "t_statistic": 2.051310391620156,
+      "p_value": 0.07435672579065564,
+      "significant": "False"
+    }
+  },
+  "interaction_effects": {
+    "mass_damping": {
+      "expected_additive": -11.098926709719567,
+      "actual": -6.141290523725583,
+      "interaction_effect": 4.957636185993985,
+      "synergistic": "True"
+    },
+    "mass_friction": {
+      "expected_additive": 97.46223400992221,
+      "actual": 2.945579757820774,
+      "interaction_effect": -94.51665425210143,
+      "synergistic": "False"
+    },
+    "damping_friction": {
+      "expected_additive": 112.98836971906508,
+      "actual": 6.786038983346576,
+      "interaction_effect": -106.2023307357185,
+      "synergistic": "False"
+    }
+  },
+  "recommended_params": []
+}

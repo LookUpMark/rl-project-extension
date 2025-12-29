@@ -1,0 +1,23 @@
+{
+  "config_name": "adr_none",
+  "mode": "adr",
+  "config": {
+    "mass": false,
+    "damping": false,
+    "friction": false,
+    "mode": "adr"
+  },
+  "seed": 42,
+  "timesteps": 2500000,
+  "source_mean": 875.00974346,
+  "source_std": 208.4154448518665,
+  "target_mean": 303.1017755138874,
+  "target_std": 222.36702567184346,
+  "transfer_gap": -65.36018281175366,
+  "final_adr_state": {
+    "mass_range": 0.0,
+    "damping_range": 0.0,
+    "friction_range": 0.0
+  },
+  "timestamp": "2025-12-29T12:27:33.398810"
+}
