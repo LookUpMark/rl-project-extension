@@ -5,27 +5,14 @@ __pycache__/
 *.so
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
 
 # Virtual Environments
 .venv/
 venv/
 ENV/
-env.bak/
-venv.bak/
 
 # IDE
 .idea/
@@ -34,12 +21,19 @@ venv.bak/
 *.swo
 *~
 
-# Jupyter Notebooks
+# Jupyter
 .ipynb_checkpoints/
 
 # MuJoCo
 *.mjb
+MUJOCO_LOG.TXT
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs (optional - uncomment to exclude from git)
+# logs/
+
+# Configs (auto-generated)
+configs/

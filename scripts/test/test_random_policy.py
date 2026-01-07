@@ -1,35 +1,28 @@
-"""Test random policy on CustomHopper - useful for environment debugging."""
+"""Test random policy on CustomHopper - for environment debugging."""
 import gymnasium as gym
 from env.custom_hopper import *
 
 
-def main():
-    render = True
-    n_episodes = 10
-
+def main(episodes=10, render=True):
     env = gym.make('CustomHopper-source-v0', render_mode='human' if render else None)
-
-    print('State space:', env.observation_space)
-    print('Action space:', env.action_space)
-    print('Masses:', env.unwrapped.get_parameters())
     
+    print(f"Obs: {env.observation_space}, Act: {env.action_space}")
+    print(f"Masses: {env.unwrapped.get_parameters()}")
     if hasattr(env.unwrapped, 'adr_state'):
-        print('ADR State:', env.unwrapped.adr_state)
+        print(f"ADR: {env.unwrapped.adr_state}")
 
-    for ep in range(n_episodes):
-        done = False
+    for ep in range(episodes):
         state, _ = env.reset()
-        episode_reward = 0
-        steps = 0
-
-        while not done:
-            action = env.action_space.sample()
-            state, reward, terminated, truncated, _ = env.step(action)
-            done = terminated or truncated
-            episode_reward += reward
+        total_reward, steps = 0, 0
+        
+        while True:
+            state, reward, term, trunc, _ = env.step(env.action_space.sample())
+            total_reward += reward
             steps += 1
-
-        print(f"Episode {ep + 1}: Steps={steps}, Reward={episode_reward:.2f}")
+            if term or trunc:
+                break
+        
+        print(f"Ep {ep+1}: {steps} steps, reward={total_reward:.1f}")
 
     env.close()
 

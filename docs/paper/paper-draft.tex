@@ -71,7 +71,7 @@ Our experiments use the MuJoCo~\cite{todorov2012} Hopper environment, a standard
 
 \subsection{Automatic Domain Randomization}
 
-Our ADR implementation maintains state $\mathcal{S} = \{\delta_m, \delta_d, \delta_f\}$ representing randomization ranges for mass, damping, and friction. Each $\delta \in [0, 1]$ specifies the fractional variation. The update rule: if mean reward $\bar{R} \geq R_{high}=1200$, ranges increase by $\epsilon = 0.05$; if $\bar{R} < R_{low}=600$, ranges decrease; otherwise unchanged.
+We train all policies using Proximal Policy Optimization (PPO)~\cite{schulman2017}, a robust on-policy algorithm well-suited for continuous control. Our ADR implementation maintains state $\mathcal{S} = \{\delta_m, \delta_d, \delta_f\}$ representing randomization ranges for mass, damping, and friction. Each $\delta \in [0, 1]$ specifies the fractional variation. The update rule: if mean reward $\bar{R} \geq R_{high}=1200$, ranges increase by $\epsilon = 0.05$; if $\bar{R} < R_{low}=600$, ranges decrease; otherwise unchanged.
 
 \subsection{Ablation Study Design}
 
@@ -309,6 +309,8 @@ We presented a comprehensive study of domain randomization for locomotion, encom
 \end{enumerate}
 
 These results have practical implications: practitioners should conduct ablation studies to identify relevant parameters rather than assuming that more randomization is better.
+
+\textbf{Future Work.} Several directions remain for future investigation: (1) validating our findings on physical hardware through real robot deployment, (2) extending the ablation study to additional parameters such as joint stiffness and latency, and (3) developing automated methods for parameter selection during training rather than post-hoc analysis.
 
 \section*{Acknowledgment}
 
