@@ -1,8 +1,12 @@
+# Starting code for final course project extension of Robot Learning - 01HFNOV
+
+Official assignment at [Google Doc](https://docs.google.com/document/d/1XWE2NB-keFvF-EDT_5muoY8gdtZYwJIeo48IMsnr9l0/edit?usp=sharing).
+
 # Automatic Domain Randomization for Robust Sim-to-Real Transfer in Locomotion Tasks
 
 **Course:** Robot Learning  
 **Institution:** Politecnico di Torino  
-**Academic Year:** 2024/2025  
+**Academic Year:** 2025/2026  
 **Authors:** Marc'Antonio Lopez (s336362), Luigi Marguglio (s332575)
 
 ---
@@ -73,6 +77,8 @@ This project makes two main contributions:
 
 Domain randomization was popularized by Tobin et al. (2017) for visual tasks, demonstrating that policies trained on randomized synthetic images could transfer successfully to real cameras. The approach was subsequently extended to dynamics randomization by Peng et al. (2018), randomizing physical properties such as mass, friction, and joint dynamics.
 
+Muratore et al. (2018) introduced SPOTA (Simulation-based Policy Optimization with Transferability Assessment), providing a principled stopping criterion for domain randomization training based on transferability estimation. Ramos et al. (2019) proposed BayesSim, a Bayesian framework that computes posterior distributions over simulator parameters, enabling adaptive domain randomization that outperforms uniform priors.
+
 ### 2.2 Sim-to-Real for Locomotion
 
 For locomotion specifically, Tan et al. (2018) achieved successful sim-to-real transfer for quadruped robots by randomizing friction coefficients and introducing latency randomization during training. Hwangbo et al. (2019) demonstrated that neural network policies trained in simulation could enable ANYmal robots to perform agile and dynamic motor skills, with careful attention to contact dynamics. Lee et al. (2020) extended this work, showing that proprioceptive controllers trained in simulation achieve zero-shot generalization to challenging natural terrains.
@@ -83,7 +89,7 @@ OpenAI's work on solving Rubik's cube with a robot hand (2019) brought ADR to pr
 
 ### 2.4 Parameter Relevance in Sim-to-Real
 
-Recent work by Gang et al. (2025) investigated the impact of static friction on sim-to-real transfer, finding that friction parameters are often the most critical for locomotion tasks. Our ablation study provides strong empirical support for this finding.
+Recent work by Hu et al. (2025) investigated the impact of static friction on sim-to-real transfer, finding that friction parameters are often the most critical for locomotion tasks. Our ablation study provides empirical support for this finding.
 
 ---
 
@@ -520,25 +526,29 @@ python scripts/test/test_random_policy.py
 
 ## 11. References
 
-1. OpenAI, Akkaya, I., Andrychowicz, M., et al. (2019). *Solving Rubik's Cube with a Robot Hand*. arXiv:1910.07113.
+1. OpenAI, I. Akkaya, M. Andrychowicz, M. Chociej, M. Litwin, B. McGrew, A. Petron, A. Paino, M. Plappert, G. Powell, R. Ribas, J. Schneider, N. Tezak, J. Tworek, P. Welinder, L. Weng, Q. Yuan, W. Zaremba, and L. Zhang (2019). *Solving Rubik's Cube with a Robot Hand*. arXiv:1910.07113.
 
-2. Tobin, J., Fong, R., Ray, A., Schneider, J., Zaremba, W., & Abbeel, P. (2017). *Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World*. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS).
+2. Tobin, J., Fong, R., Ray, A., Schneider, J., Zaremba, W., & Abbeel, P. (2017). *Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World*. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp. 23-30.
 
-3. Peng, X. B., Andrychowicz, M., Zaremba, W., & Abbeel, P. (2018). *Sim-to-Real Robot Learning from Pixels with Progressive Nets*. Conference on Robot Learning (CoRL).
+3. Peng, X. B., Andrychowicz, M., Zaremba, W., & Abbeel, P. (2018). *Sim-to-Real Transfer of Robotic Control with Dynamics Randomization*. IEEE International Conference on Robotics and Automation (ICRA), pp. 3803-3810.
 
-4. Tan, J., Zhang, T., Coumans, E., et al. (2018). *Sim-to-Real: Learning Agile Locomotion For Quadruped Robots*. Robotics: Science and Systems (RSS).
+4. Tan, J., Zhang, T., Coumans, E., Iscen, A., Bai, Y., Hafner, D., Bohez, S., & Vanhoucke, V. (2018). *Sim-to-Real: Learning Agile Locomotion For Quadruped Robots*. arXiv:1804.10332.
 
-5. Hwangbo, J., Lee, J., Dosovitskiy, A., et al. (2019). *Learning Agile and Dynamic Motor Skills for Legged Robots*. Science Robotics, 4(26).
+5. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). *Proximal Policy Optimization Algorithms*. arXiv:1707.06347.
 
-6. Lee, J., Hwangbo, J., Wellhausen, L., Koltun, V., & Hutter, M. (2020). *Learning Quadrupedal Locomotion over Challenging Terrain*. Science Robotics, 5(47).
+6. Hu, X., Sun, Q., He, B., Liu, H., Zhang, X., Lu, C., & Zhong, J. (2025). *Impact of Static Friction on Sim2Real in Robotic Reinforcement Learning*. arXiv:2503.01255.
 
-7. Mehta, B., Diaz, M., Golemo, F., Pal, C. J., & Paull, L. (2020). *Active Domain Randomization*. Conference on Robot Learning (CoRL), PMLR.
+7. Mehta, B., Diaz, M., Golemo, F., Pal, C. J., & Paull, L. (2019). *Active Domain Randomization*. arXiv:1904.04762.
 
-8. Schulman, J., Wolski, F., Dhariwal, P., Radford, A., & Klimov, O. (2017). *Proximal Policy Optimization Algorithms*. arXiv:1707.06347.
+8. Muratore, F., Treede, F., Gienger, M., & Peters, J. (2018). *Domain Randomization for Simulation-Based Policy Optimization with Transferability Assessment*. Conference on Robot Learning (CoRL), PMLR, pp. 700-713.
 
-9. Gang, S., et al. (2025). *Impact of Static Friction on Sim2Real in Robotic Reinforcement Learning*.
+9. Ramos, F., Possas, R. C., & Fox, D. (2019). *BayesSim: Adaptive Domain Randomization via Probabilistic Inference for Robotics Simulators*. arXiv:1906.01728.
 
-10. Todorov, E., Erez, T., & Tassa, Y. (2012). *MuJoCo: A Physics Engine for Model-Based Control*. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS).
+10. Hwangbo, J., Lee, J., Dosovitskiy, A., Bellicoso, D., Tsounis, V., Koltun, V., & Hutter, M. (2019). *Learning Agile and Dynamic Motor Skills for Legged Robots*. Science Robotics, 4(26).
+
+11. Lee, J., Hwangbo, J., Wellhausen, L., Koltun, V., & Hutter, M. (2020). *Learning Quadrupedal Locomotion over Challenging Terrain*. Science Robotics, 5(47).
+
+12. Todorov, E., Erez, T., & Tassa, Y. (2012). *MuJoCo: A Physics Engine for Model-Based Control*. IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pp. 5026-5033.
 
 ---
 

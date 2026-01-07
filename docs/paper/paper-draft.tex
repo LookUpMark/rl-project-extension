@@ -7,6 +7,7 @@
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{url}
 
 \begin{document}
 
@@ -61,7 +62,7 @@ For locomotion specifically, Tan et al.~\cite{tan2018} achieved successful sim-t
 
 OpenAI's work on solving Rubik's cube with a robot hand~\cite{openai2019} brought ADR to prominence by demonstrating that automatic difficulty adjustment could achieve unprecedented dexterity through an emergent curriculum. Mehta et al.~\cite{mehta2020} proposed Active Domain Randomization, which learns a parameter sampling strategy to prioritize informative environment variations rather than relying on uniform sampling.
 
-Recent work by Gang et al.~\cite{gang2025} investigated the impact of static friction on sim-to-real transfer, finding that friction parameters are often the most critical for locomotion tasks. Our ablation study provides empirical support for this finding.
+Recent work by Hu et al.~\cite{hu2025} investigated the impact of static friction on sim-to-real transfer, finding that friction parameters are often the most critical for locomotion tasks. Our ablation study provides empirical support for this finding.
 
 \section{Method}
 
@@ -317,18 +318,43 @@ These results have practical implications: practitioners should conduct ablation
 This work was conducted as part of the Robot Learning course at Politecnico di Torino, under the supervision of the VANDAL laboratory.
 
 \begin{thebibliography}{00}
-\bibitem{openai2019} OpenAI et al., ``Solving Rubik's Cube with a Robot Hand,'' arXiv:1910.07113, 2019.
-\bibitem{tobin2017} J. Tobin et al., ``Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World,'' IROS, 2017.
-\bibitem{peng2018} X. B. Peng et al., ``Sim-to-Real Robot Learning from Pixels with Progressive Nets,'' CoRL, 2018.
-\bibitem{tan2018} J. Tan et al., ``Sim-to-Real: Learning Agile Locomotion For Quadruped Robots,'' RSS, 2018.
-\bibitem{schulman2017} J. Schulman et al., ``Proximal Policy Optimization Algorithms,'' arXiv:1707.06347, 2017.
-\bibitem{gang2025} S. Gang et al., ``Impact of Static Friction on Sim2Real in Robotic Reinforcement Learning,'' 2025.
-\bibitem{mehta2020} B. Mehta, M. Diaz, F. Golemo, C. J. Pal, and L. Paull, ``Active Domain Randomization,'' Proc. Conference on Robot Learning (CoRL), PMLR, 2020.
-\bibitem{muratore2018} F. Muratore, F. Treede, M. Gienger, and J. Peters, ``Domain Randomization for Simulation-Based Policy Optimization with Transferability Assessment,'' Proc. Conference on Robot Learning (CoRL), PMLR 87:700-713, 2018.
-\bibitem{ramos2019} F. Ramos, R. C. Possas, and D. Fox, ``BayesSim: Adaptive Domain Randomization via Probabilistic Inference for Robotics Simulators,'' Robotics: Science and Systems (RSS), 2019.
-\bibitem{hwangbo2019} J. Hwangbo, J. Lee, A. Dosovitskiy, D. Bellicoso, V. Tsounis, V. Koltun, and M. Hutter, ``Learning Agile and Dynamic Motor Skills for Legged Robots,'' Science Robotics, vol. 4, no. 26, 2019.
-\bibitem{lee2020} J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter, ``Learning Quadrupedal Locomotion over Challenging Terrain,'' Science Robotics, vol. 5, no. 47, 2020.
-\bibitem{todorov2012} E. Todorov, T. Erez, and Y. Tassa, ``MuJoCo: A Physics Engine for Model-Based Control,'' IEEE/RSJ Int. Conf. Intelligent Robots and Systems (IROS), 2012.
+
+\bibitem{openai2019}
+OpenAI, I. Akkaya, M. Andrychowicz, M. Chociej, M. Litwin, B. McGrew, A. Petron, A. Paino, M. Plappert, G. Powell, R. Ribas, J. Schneider, N. Tezak, J. Tworek, P. Welinder, L. Weng, Q. Yuan, W. Zaremba, and L. Zhang, ``Solving Rubik's Cube with a Robot Hand,'' \textit{arXiv preprint arXiv:1910.07113}, 2019.
+
+\bibitem{tobin2017}
+J. Tobin, R. Fong, A. Ray, J. Schneider, W. Zaremba, and P. Abbeel, ``Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World,'' in \textit{Proc. IEEE/RSJ Int. Conf. on Intelligent Robots and Systems (IROS)}, 2017, pp. 23-30.
+
+\bibitem{peng2018}
+X. B. Peng, M. Andrychowicz, W. Zaremba, and P. Abbeel, ``Sim-to-Real Transfer of Robotic Control with Dynamics Randomization,'' in \textit{Proc. IEEE Int. Conf. on Robotics and Automation (ICRA)}, 2018, pp. 3803-3810.
+
+\bibitem{tan2018}
+J. Tan, T. Zhang, E. Coumans, A. Iscen, Y. Bai, D. Hafner, S. Bohez, and V. Vanhoucke, ``Sim-to-Real: Learning Agile Locomotion For Quadruped Robots,'' \textit{arXiv preprint arXiv:1804.10332}, 2018.
+
+\bibitem{schulman2017}
+J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, ``Proximal Policy Optimization Algorithms,'' \textit{arXiv preprint arXiv:1707.06347}, 2017.
+
+\bibitem{hu2025}
+X. Hu, Q. Sun, B. He, H. Liu, X. Zhang, C. Lu, and J. Zhong, ``Impact of Static Friction on Sim2Real in Robotic Reinforcement Learning,'' \textit{arXiv preprint arXiv:2503.01255}, 2025.
+
+\bibitem{mehta2020}
+B. Mehta, M. Diaz, F. Golemo, C. J. Pal, and L. Paull, ``Active Domain Randomization,'' \textit{arXiv preprint arXiv:1904.04762}, 2019.
+
+\bibitem{muratore2018}
+F. Muratore, F. Treede, M. Gienger, and J. Peters, ``Domain Randomization for Simulation-Based Policy Optimization with Transferability Assessment,'' in \textit{Proc. Conf. on Robot Learning (CoRL)}, PMLR, 2018, pp. 700-713.
+
+\bibitem{ramos2019}
+F. Ramos, R. C. Possas, and D. Fox, ``BayesSim: Adaptive Domain Randomization via Probabilistic Inference for Robotics Simulators,'' \textit{arXiv preprint arXiv:1906.01728}, 2019.
+
+\bibitem{hwangbo2019}
+J. Hwangbo, J. Lee, A. Dosovitskiy, D. Bellicoso, V. Tsounis, V. Koltun, and M. Hutter, ``Learning Agile and Dynamic Motor Skills for Legged Robots,'' \textit{Science Robotics}, vol. 4, no. 26, 2019.
+
+\bibitem{lee2020}
+J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter, ``Learning Quadrupedal Locomotion over Challenging Terrain,'' \textit{Science Robotics}, vol. 5, no. 47, 2020.
+
+\bibitem{todorov2012}
+E. Todorov, T. Erez, and Y. Tassa, ``MuJoCo: A Physics Engine for Model-Based Control,'' in \textit{Proc. IEEE/RSJ Int. Conf. Intelligent Robots and Systems (IROS)}, 2012, pp. 5026-5033.
+
 \end{thebibliography}
 
 \end{document}
